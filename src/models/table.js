@@ -266,8 +266,8 @@ class Table {
    *
    * @returns {string} The SQL count string
    */
-  buildCountQuery(conditional) {
-    let [whereString, whereValues] = this.whereQueryToWhereString(conditional);
+  buildCountQuery(conditional, operator) {
+    let [whereString, whereValues] = this.whereQueryToWhereString(conditional, operator);
     return [`SELECT COUNT(*) AS \`entry_count\` FROM \`${this.name}\`${whereString};`, whereValues];
   }
 
@@ -371,8 +371,8 @@ class Table {
    *
    * @return {*[APIError, number]} An error, if errored, and the result
    */
-  async count(conditional) {
-    const [queryString, queryValues] = this.buildCountQuery(conditional || {});
+  async count(conditional, operator) {
+    const [queryString, queryValues] = this.buildCountQuery(conditional || {}, operator);
 
     const [err, result] = await this.db.query(queryString, queryValues);
     if (err) {
