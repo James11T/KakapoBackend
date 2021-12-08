@@ -105,6 +105,20 @@ class NotLikedError extends APIError {
   }
 }
 
+class PendingFriendRequestError extends APIError {
+  constructor(errorData) {
+    super("You already have a pending friend request with this user.", "112", errorData);
+    this.name = "PendingFriendRequestError";
+  }
+}
+
+class SelfFriendRequestError extends APIError {
+  constructor(errorData) {
+    super("You can not send a friend reuqest to yourself.", "113", errorData);
+    this.name = "SelfFriendRequestError";
+  }
+}
+
 class GenericError extends APIError {
   constructor(errorData) {
     super("Server error.", "200", errorData);
@@ -211,4 +225,6 @@ export {
   AlreadyLikedError,
   NotLikedError,
   CommentNotFoundError,
+  PendingFriendRequestError,
+  SelfFriendRequestError,
 };
