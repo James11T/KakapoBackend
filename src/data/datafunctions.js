@@ -36,7 +36,7 @@ const createNewUser = async (data) => {
     display_name = kakapo_id;
   }
 
-  if (checkPassword(password)) {
+  if (!checkPassword(password)) {
     return [new BadParametersError({ badParameters: ["password"] }), null];
   }
 
