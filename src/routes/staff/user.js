@@ -59,10 +59,14 @@ const getUsers = async (req, res) => {
 
   try {
     from = Number(from);
+  } catch (castingError) {
+    return sendError(res, new BadParametersError({ badParameters: ["from"] }));
+  }
+
+  try {
     count = Number(count);
   } catch (castingError) {
-    // Provided parameters are not numbers
-    return sendError(res, new BadParametersError());
+    return sendError(res, new BadParametersError({ badParameters: ["count"] }));
   }
 
   count = clamp(count, 1, 50);
