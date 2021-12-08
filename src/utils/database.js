@@ -1,4 +1,4 @@
-import { GenericError } from "/users/james/desktop/programming/kakaponew/kakapobackend/src/errors/apierrors.js";
+import { GenericError } from "../errors/apierrors.js";
 
 /**
  *
