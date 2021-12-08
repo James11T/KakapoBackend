@@ -8,7 +8,12 @@ import { resolveUserMiddleware } from "../../middleware/data.middleware.js";
 
 const getFullUserData = async (req, res) => {
   const [postCountErr, postCount] = await global.db.table("post").count({ author: req.user.id });
-  if (postCountErr) {
+  const [friendCountErr, friendCount] = await global.db
+    .table("friendship")
+    .count({ user1: req.user.id, user2: req.user.id }, "OR");
+  const [commentCountErr, commentCount] = await global.db.table("comment").count({ author: req.user.id });
+
+  if (postCountErr || friendCountErr || commentCountErr) {
     return sendError(res, new GenericError());
   }
 
@@ -16,6 +21,8 @@ const getFullUserData = async (req, res) => {
     user: {
       ...global.db.table("user").filter(req.user, 50),
       post_count: postCount,
+      friend_count: friendCount,
+      comment_count: commentCount,
     },
   });
 };
@@ -101,7 +108,7 @@ const getStaffUserRoutes = () => {
   const router = express.Router();
 
   router.get("/", getUserAtSensitivity(50));
-  router.get("/getuserdata", resolveUserMiddleware, getFullUserData);
+  router.get("/details", resolveUserMiddleware, getFullUserData);
   router.get("/range", getUsers);
   router.get("/all", isRank(process.env.ELEVATED_DEVELOPER), getAllUsers);
 
