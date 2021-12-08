@@ -330,9 +330,7 @@ class Table {
           let conditional = {};
           conditional[fieldData.reference.field] = row[field];
 
-          const [getRefError, refResult] = await global.db
-            .table(fieldData.reference.table)
-            .first("*", conditional, "AND");
+          const [getRefError, refResult] = await global.db.table(fieldData.reference.table).first("*", conditional);
           if (getRefError) {
             rows[rowIndex][field] = null;
           }
