@@ -8,7 +8,7 @@ const model = (db) =>
     content: new StringField("liker", { maxLength: 256, sensitivity: 0 }),
     commented_at: new NumberField("commented_at", { sensitivity: 0 }),
     author: new NumberField("author", { sensitivity: 0, reference: { table: "user", field: "id" } }),
-    edited: new BooleanField("edited", { defaultValue: false }),
+    edited: new BooleanField("edited", { defaultValue: false, sensitivity: 0 }),
     public_id: new StringField("public_id", { maxLength: 16, sensitivity: 0 }),
   });
 
