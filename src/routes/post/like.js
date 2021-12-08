@@ -65,7 +65,7 @@ const getPostLikeRoutes = () => {
 
   router.get("/", resolvePostMiddleware, getLikeCount);
   router.post("/", isAuthenticated, resolvePostMiddleware, likePost);
-  router.delete("/", isAuthenticated, resolvePostMiddleware.length, unlikePost);
+  router.delete("/", isAuthenticated, resolvePostMiddleware, unlikePost);
 
   return router;
 };
