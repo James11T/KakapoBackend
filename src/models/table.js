@@ -73,6 +73,8 @@ class Table {
    * E.g.
    * ["a", "b"] -> "(`a`, `b`)"
    *
+   * @param {string[]} fields An array or column names
+   *
    * @return {string} The SQL string
    */
   fieldsToSelectString(fields) {
@@ -92,6 +94,9 @@ class Table {
    * Turns an object whos keys are fields into a string for after WHERE
    * E.g.
    * { a: "xyz", b: "abc" } -> ["(`a`=? OR `b`=?)", ["xyz", "abc"]]
+   *
+   * @param {Object} config An object whos keys are column names
+   * @param {string} operator The operator to compare join the query
    *
    * @return {*[string, *[]]} The operators joined with the values extracted into a seperate list
    */
@@ -113,7 +118,7 @@ class Table {
    *
    * @return {*[string, *[]]} The operators joined with the values extracted into a seperate list
    */
-  whereQueryToWhereString(query, operator = "OR") {
+  whereQueryToWhereString(query, operator = "AND") {
     if (!query) {
       return ["", []];
     }
@@ -227,10 +232,10 @@ class Table {
    *
    * @returns {*[string, *[]]} The SQL select string and its values
    */
-  buildSelectQuery(fields, conditional) {
+  buildSelectQuery(fields, conditional, operator) {
     let fieldNamesString = this.fieldsToSelectString(fields);
 
-    let [whereString, whereValues] = this.whereQueryToWhereString(conditional);
+    let [whereString, whereValues] = this.whereQueryToWhereString(conditional, operator);
 
     const selectString = `SELECT ${fieldNamesString} FROM \`${this.name}\`${whereString};`;
     return [selectString, whereValues];
@@ -325,7 +330,9 @@ class Table {
           let conditional = {};
           conditional[fieldData.reference.field] = row[field];
 
-          const [getRefError, refResult] = await global.db.table(fieldData.reference.table).first("*", conditional);
+          const [getRefError, refResult] = await global.db
+            .table(fieldData.reference.table)
+            .first("*", conditional, "AND");
           if (getRefError) {
             rows[rowIndex][field] = null;
           }
@@ -393,8 +400,8 @@ class Table {
    *
    * @return {*[APIError, Object[]]} An error, if errored, and the first row
    */
-  async first(fields, conditional) {
-    const [queryString, queryValues] = this.buildSelectQuery(fields, conditional);
+  async first(fields, conditional, operator = "AND") {
+    const [queryString, queryValues] = this.buildSelectQuery(fields, conditional, operator);
 
     return await this.queryAndReturn(queryString, queryValues, true);
   }

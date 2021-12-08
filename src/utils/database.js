@@ -26,12 +26,14 @@ const orderedFriendQuery = (user1, user2) => {
 const usersAreFriends = async (user1, user2) => {
   let friendshipQuery = orderedFriendQuery(user1, user2);
 
-  const [getFriendshipError, existingFiendResult] = await global.db.table("friendship").first(["*"], friendshipQuery);
+  const [getFriendshipError, existingFiendResult] = await global.db
+    .table("friendship")
+    .first("*", friendshipQuery, "AND");
   if (getFriendshipError) {
     return [new GenericError(), null];
   }
 
-  return !!existingFiendResult;
+  return [null, !!existingFiendResult];
 };
 
 export { orderedFriendQuery, usersAreFriends };
