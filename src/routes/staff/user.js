@@ -100,8 +100,8 @@ const getAllUsers = async (req, res) => {
 const getStaffUserRoutes = () => {
   const router = express.Router();
 
-  router.post("/getuser", getUserAtSensitivity(50));
-  router.post("/getuserdata", resolveUserMiddleware, getFullUserData);
+  router.get("/getuser", getUserAtSensitivity(50));
+  router.get("/getuserdata", resolveUserMiddleware, getFullUserData);
   router.get("/getusers", getUsers);
   router.get("/getallusers", isRank(process.env.ELEVATED_DEVELOPER), getAllUsers);
 
