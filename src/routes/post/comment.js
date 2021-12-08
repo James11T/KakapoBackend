@@ -7,7 +7,8 @@ import {
   BadParametersError,
   NotCommentOwnerError,
 } from "../../errors/apierrors.js";
-import { checkRequiredParameters, getEpoch, generatePublicId } from "../../utils.js";
+import { checkRequiredParameters } from "../../utils/validations.js";
+import { getEpoch, generatePublicId } from "../../utils/funcs.js";
 import { isAuthenticated } from "../../middleware/auth.middleware.js";
 import { resolvePostMiddleware, resolveCommentMiddleware } from "../../middleware/data.middleware.js";
 

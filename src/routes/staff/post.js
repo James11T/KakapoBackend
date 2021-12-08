@@ -1,7 +1,7 @@
 import express from "express";
 
 import { GenericError, MissingParametersError, PostNotFoundError, sendError } from "../../errors/apierrors.js";
-import { checkRequiredParameters } from "../../utils.js";
+import { checkRequiredParameters } from "../../utils/validations.js";
 
 const deletePost = async (req, res) => {
   const [hasRequiredParameters, missingParameters] = checkRequiredParameters(req.body, ["post_id"]);

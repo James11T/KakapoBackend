@@ -9,7 +9,8 @@ import {
 } from "../errors/apierrors.js";
 import { getPostCommentRoutes } from "./post/comment.js";
 import { getPostLikeRoutes } from "./post/like.js";
-import { checkRequiredParameters, generatePublicId, getEpoch } from "../utils.js";
+import { generatePublicId, getEpoch } from "../utils/funcs.js";
+import { checkRequiredParameters } from "../utils/validations.js";
 import { isAuthenticated } from "../middleware/auth.middleware.js";
 import { resolvePostMiddleware } from "../middleware/data.middleware.js";
 

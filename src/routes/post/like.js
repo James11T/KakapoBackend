@@ -1,6 +1,6 @@
 import express from "express";
 import { GenericError, sendError, AlreadyLikedError, NotLikedError } from "../../errors/apierrors.js";
-import { getEpoch } from "../../utils.js";
+import { getEpoch } from "../../utils/funcs.js";
 import { isAuthenticated } from "../../middleware/auth.middleware.js";
 import { resolvePostMiddleware } from "../../middleware/data.middleware.js";
 

@@ -1,7 +1,7 @@
 import express from "express";
 
 import { getUserAtSensitivity } from "../shared.js";
-import { clamp } from "../../utils.js";
+import { clamp } from "../../utils/funcs.js";
 import { isRank } from "../../middleware/auth.middleware.js";
 import { BadParametersError, GenericError } from "../../errors/apierrors.js";
 import { resolveUserMiddleware } from "../../middleware/data.middleware.js";

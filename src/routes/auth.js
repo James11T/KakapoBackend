@@ -12,7 +12,7 @@ import {
 import { checkHash } from "../auth/passwords.js";
 import { signToken } from "../auth/tokens.js";
 import { createNewUser } from "../data/datafunctions.js";
-import { checkRequiredParameters } from "../utils.js";
+import { checkRequiredParameters } from "../utils/validations.js";
 
 const signIn = async (req, res) => {
   /**

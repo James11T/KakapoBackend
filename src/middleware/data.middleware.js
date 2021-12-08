@@ -1,4 +1,4 @@
-import { checkRequiredParameters } from "../utils.js";
+import { checkRequiredParameters } from "../utils/validations.js";
 import {
   sendError,
   MissingParametersError,
@@ -18,7 +18,7 @@ import {
  *
  * @return {function} The middleware to use
  */
-const resolvePublicID = (table, field, error) => {
+const resolveDatabaseEntry = (table, field, error, column = "public_id") => {
   return async (req, res, next) => {
     const [hasRequiredParameters, missingParameters] = checkRequiredParameters(req.body, [field]);
     if (!hasRequiredParameters) {
@@ -26,8 +26,10 @@ const resolvePublicID = (table, field, error) => {
     }
 
     const fieldValue = req.body[field];
+    let conditional = {};
+    conditional[column] = fieldValue;
 
-    const [getPostError, result] = await global.db.table(table).first("*", { public_id: fieldValue });
+    const [getPostError, result] = await global.db.table(table).first("*", conditional);
     if (getPostError) {
       return sendError(res, new GenericError());
     }
@@ -42,8 +44,8 @@ const resolvePublicID = (table, field, error) => {
   };
 };
 
-const resolvePostMiddleware = resolvePublicID("post", "post_id", PostNotFoundError);
-const resolveCommentMiddleware = resolvePublicID("comment", "comment_id", CommentNotFoundError);
-const resolveUserMiddleware = resolvePublicID("user", "kakapo_id", UserNotFoundError);
+const resolvePostMiddleware = resolveDatabaseEntry("post", "post_id", PostNotFoundError);
+const resolveCommentMiddleware = resolveDatabaseEntry("comment", "comment_id", CommentNotFoundError);
+const resolveUserMiddleware = resolveDatabaseEntry("user", "kakapo_id", UserNotFoundError, "kakapo_id");
 
-export { resolvePostMiddleware, resolveCommentMiddleware, resolveUserMiddleware, resolvePublicID };
+export { resolvePostMiddleware, resolveCommentMiddleware, resolveUserMiddleware, resolveDatabaseEntry };

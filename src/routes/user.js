@@ -1,7 +1,7 @@
 import express from "express";
 
 import { sendError, MissingParametersError, GenericError } from "../errors/apierrors.js";
-import { checkRequiredParameters } from "../utils.js";
+import { checkRequiredParameters } from "../utils/validations.js";
 import { isAuthenticated } from "../middleware/auth.middleware.js";
 import { getUserAtSensitivity } from "./shared.js";
 

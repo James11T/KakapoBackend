@@ -1,5 +1,5 @@
 import { MissingParametersError, UserNotFoundError, sendError } from "../errors/apierrors.js";
-import { checkRequiredParameters } from "../utils.js";
+import { checkRequiredParameters } from "../utils/validations.js";
 
 const getUserAtSensitivity = (sensitivity) => {
   return async (req, res) => {

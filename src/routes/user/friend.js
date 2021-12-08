@@ -2,7 +2,8 @@ import express from "express";
 import { sendError, AlreadyFriendsError, GenericError, NoFriendRequestError } from "../../errors/apierrors.js";
 import { isAuthenticated } from "../../middleware/auth.middleware.js";
 import { resolveUserMiddleware } from "../../middleware/data.middleware.js";
-import { getEpoch } from "../../utils.js";
+import { usersAreFriends, orderedFriendQuery } from "../../utils/database.js";
+import { getEpoch } from "../../utils/funcs.js";
 
 const getFriendCount = async (req, res) => {
   const [countError, friendCount] = await global.db.table("friend_request").count();
@@ -20,8 +21,16 @@ const sendFriendRequest = async (req, res) => {
     sent_at: getEpoch(),
   };
 
-  const [createFriendError, _] = await global.db.table("friend_request").new(newFR);
+  const [checkfriendshipError, areAlreadyFriends] = await usersAreFriends(req.authenticatedUser, req.user);
+  if (checkfriendshipError) {
+    return sendError(res, new GenericError());
+  }
 
+  if (areAlreadyFriends) {
+    return sendError(res, new AlreadyFriendsError());
+  }
+
+  const [createFriendError, _] = await global.db.table("friend_request").new(newFR);
   if (createFriendError) {
     return sendError(res, new GenericError());
   }
@@ -44,32 +53,28 @@ const acceptFriendRequest = async (req, res) => {
   }
 
   // Check not already friends
-  let friendshipQuery;
-  if (req.authenticatedUser.id < req.user.id) {
-    friendshipQuery = { user1: req.authenticatedUser.id, user2: req.user.id };
-  } else {
-    friendshipQuery = { user1: req.user.id, user2: req.authenticatedUser.id };
-  }
-
-  const [getFriendshipError, existingFiendRequest] = await global.db.table("friendship").first(["*"], friendshipQuery);
-  if (getFriendshipError) {
+  const [checkfriendshipError, areAlreadyFriends] = await usersAreFriends(req.authenticatedUser, req.user);
+  if (checkfriendshipError) {
     return sendError(res, new GenericError());
   }
 
-  if (existingFiendRequest) {
+  if (areAlreadyFriends) {
     return sendError(res, new AlreadyFriendsError());
   }
 
+  const newFriendship = {
+    ...orderedFriendQuery(req.authenticatedUser, req.user),
+    friends_since: getEpoch(),
+  };
+
   // Create friendship
-  const [createFriendshipError, createFriendshipResult] = await global.db
-    .table("friendship")
-    .new({ ...friendshipQuery, friends_since: getEpoch() });
+  const [createFriendshipError] = await global.db.table("friendship").new(newFriendship);
   if (createFriendshipError) {
     return sendError(res, new GenericError());
   }
 
   // Delete friend request
-  const [deleteRequestError, deleteRequestResult] = await global.db.table("friend_request").delete(friendRequestQuery);
+  const [deleteRequestError] = await global.db.table("friend_request").delete(friendRequestQuery);
   if (deleteRequestError) {
     return sendError(res, new GenericError());
   }

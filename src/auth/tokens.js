@@ -1,5 +1,5 @@
 import jwt from "jsonwebtoken";
-import { getEpoch } from "../utils.js";
+import { getEpoch } from "../utils/funcs.js";
 
 import { BadTokenError, NotAuthenticatedError } from "../errors/apierrors.js";
 

@@ -1,5 +1,6 @@
 import { MissingParametersError, BadParametersError, GenericError } from "../errors/apierrors.js";
-import { checkRequiredParameters, checkEmail, getEpoch, getUUID, checkKakapoId, checkPassword } from "../utils.js";
+import { getEpoch, getUUID } from "../utils/funcs.js";
+import { checkRequiredParameters, checkEmail, checkKakapoId, checkPassword } from "../utils/validations.js";
 import { hashPassword, toPasswordHashString } from "../auth/passwords.js";
 
 /**
