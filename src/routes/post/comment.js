@@ -4,10 +4,11 @@ import {
   MissingParametersError,
   CommentNotFoundError,
   BadParametersError,
+  NotCommentOwnerError
 } from "../../errors/apierrors.js";
 import { checkRequiredParameters, getEpoch, generatePublicId } from "../../utils.js";
 import { isAuthenticated } from "../../middleware/auth.js";
-import { resolvePostMiddleware } from "../../middleware/data.js";
+import { resolvePostMiddleware, resolveCommentMiddleware } from "../../middleware/data.js";
 
 const getComment = async (req, res) => {
   const [hasRequiredParameters, missingParameters] = checkRequiredParameters(req.body, ["comment_id"]);
@@ -61,10 +62,21 @@ const addPostComment = async (req, res) => {
     return sendError(res, new GenericError());
   }
 
-  return res.send({ success: true, content: trimmedContent });
+  const commentExport = {
+    id: newComment.public_id,
+    content: newComment.content,
+    commented_at: newComment.commented_at,
+    post: req.post.public_id
+  }
+
+  return res.send({ success: true, comment: commentExport });
 };
 
-const deletePostComment = async (req, res) => {};
+const deletePostComment = async (req, res) => {
+  if (req.user.id !== req.comment.author.id) {
+    return sendError(res, new NotCommentOwnerError());
+  }
+};
 
 const editPostComment = async (req, res) => {};
 
@@ -75,8 +87,8 @@ const getPostCommentRoutes = () => {
 
   router.get("/", getComment);
   router.post("/", isAuthenticated, resolvePostMiddleware, addPostComment);
-  router.put("/", isAuthenticated, resolvePostMiddleware, editPostComment);
-  router.delete("/", isAuthenticated, resolvePostMiddleware, deletePostComment);
+  router.put("/", isAuthenticated, resolveCommentMiddleware, editPostComment);
+  router.delete("/", isAuthenticated, resolveCommentMiddleware, deletePostComment);
 
   router.get("/count", resolvePostMiddleware, getCommentCount);
   router.get("/range", resolvePostMiddleware, getCommentsInRange);
