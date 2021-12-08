@@ -55,7 +55,7 @@ class DBWrapper {
         }
         default: {
           // Not accounted for
-          externalError = new DatabaseError();
+          externalError = new GenericError();
           break;
         }
       }
