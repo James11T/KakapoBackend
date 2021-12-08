@@ -1,0 +1,330 @@
+:root {
+  color-scheme: dark;
+  
+  --get: rgb(19, 167, 216);
+  --post: rgb(6, 214, 160);
+  --delete: rgb(239, 71, 111);
+  --put: rgb(255, 209, 102);
+  --other: rgb(100, 22, 164);
+}
+
+.dark {
+  --grey-100: rgb(40, 40, 40);
+  --grey-200: rgb(45, 45, 45);
+  --grey-300: rgb(50, 50, 50);
+  --grey-400: rgb(55, 55, 55);
+  --grey-500: rgb(60, 60, 60);
+
+  --bg: rgb(50, 50, 50);
+  --sidebar: var(--grey-100);
+  --text-primary: rgb(255, 255, 255);
+  --text-secondary: rgb(230, 230, 230);
+  --muted: rgb(150, 150, 150);
+
+  --borders: rgb(80, 80, 80);
+}
+
+.light {
+  --grey-100: rgb(210, 210, 210);
+  --grey-200: rgb(215, 215, 215);
+  --grey-300: rgb(220, 220, 220);
+  --grey-400: rgb(225, 225, 225);
+  --grey-500: rgb(230, 230, 230);
+
+  --bg: rgb(250, 250, 250);
+  --sidebar: var(--grey-500);
+  --text-primary: rgb(20, 20, 20);
+  --text-secondary: rgb(45, 45, 45);
+  --muted: rgb(100, 100, 100);
+
+  --borders: var(--grey-100);
+}
+
+html {
+  scroll-behavior: smooth;
+  --transition: 400ms;
+}
+
+body {
+  margin: 0;
+  height: 100vh;
+  background: var(--bg);
+  overflow-y: scroll;
+
+  color: var(--text-primary);
+  font-family: Nunito, Arial, Helvetica, sans-serif;
+
+  transition: background-color var(--transition), color var(--transition);
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  margin: 0;
+  font-weight: 600;
+}
+
+ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+a {
+  text-decoration: none;
+  color: inherit;
+}
+
+p {
+  margin: 0;
+  font-weight: 100;
+  color: var(--text-secondary);
+}
+
+table {
+  border-collapse: collapse;
+  width: 40%;
+  font-family: "Courier New", Courier, monospace;
+}
+
+pre {
+  border: none !important;
+  margin: 0 !important;
+}
+
+td,
+th {
+  text-align: left;
+  padding: 0.4rem;
+}
+
+tr {
+  background: var(--grey-200);
+  border-bottom: 1px solid var(--grey-400);
+}
+
+tr:first-child {
+  background: var(--grey-100);
+}
+
+tr:last-child {
+  border-bottom: none;
+}
+
+td,
+th {
+  border-right: 1px solid var(--grey-500);
+}
+
+td:last-child,
+th:last-child {
+  border-right: none;
+}
+
+.codeContainer {
+  padding: 0.5rem;
+  background: var(--grey-500);
+  border-radius: 0.8rem;
+
+  transition: background-color var(--transition);
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+body * {
+  box-sizing: border-box;
+}
+
+main {
+  display: flex;
+  min-height: 100%;
+  width: 100%;
+  margin: 0 auto;
+}
+
+main > * {
+  flex-grow: 1;
+  transition: background-color var(--transition);
+}
+
+main > *:nth-child(1) {
+  /* Endpoints */
+  flex-basis: 15%;
+  min-width: 15rem;
+  background: var(--sidebar);
+  padding: 0 0.3rem;
+
+  border-right: 1px solid var(--borders);
+}
+
+main > *:nth-child(2) {
+  /* Documentation */
+  flex-basis: 55%;
+
+  border-right: 1px solid var(--borders);
+}
+
+main > *:nth-child(3) {
+  /* Models */
+  flex-basis: 30%;
+  min-width: 22rem;
+}
+
+main > *:nth-child(3) > h2, main > *:nth-child(3) > p {
+  margin-left: 0.3rem;
+}
+
+.root {
+  font-family: "Courier New", Courier, monospace;
+}
+
+.endpointTitle {
+  font-family: "Courier New", Courier, monospace;
+}
+
+.httpGet::before,
+.httpPost::before,
+.httpDelete::before,
+.httpOther::before,
+.httpPut::before {
+  display: inline-block;
+  margin-right: 0.4rem;
+  text-transform: capitalize;
+  font-weight: 600;
+}
+
+.httpGet::before {
+  color: var(--get);
+  content: "GET";
+}
+
+.httpPost::before {
+  color: var(--post);
+  content: "POST";
+}
+
+.httpDelete::before {
+  color: var(--delete);
+  content: "DELETE";
+}
+
+.httpPut::before {
+  color: var(--put);
+  content: "PUT";
+}
+
+.httpOther::before {
+  color: var(--other);
+  content: "OTHER";
+}
+
+.endpointList {
+  font-family: "Courier New", Courier, monospace;
+  padding-left: 1rem;
+}
+
+.docslist > li {
+  padding: 0.1rem 0;
+  border-bottom: 1px solid var(--borders);
+}
+
+.docslist > li:last-child {
+  border: none;
+}
+
+.endpointList ul {
+  padding-left: 1rem;
+}
+
+.endpointdoc {
+  width: 100%;
+  padding: 0.4rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.endpointdoc > h2 {
+  font-family: "Courier New", Courier, monospace;
+}
+
+.mute {
+  color: var(--muted);
+}
+
+.kwd {
+  color: rgb(43, 115, 197) !important;
+}
+
+.lit {
+  color: rgb(81, 143, 143) !important;
+}
+
+.pln {
+  color: rgb(0, 136, 0) !important;
+}
+
+.typ {
+  color: rgb(155, 19, 155) !important;
+}
+
+.pln:first-child {
+  display: none;
+}
+
+.pln:last-child {
+  display: none;
+}
+
+.contents ul:hover {
+  background: rgba(90, 90, 90, 0.1);
+}
+
+.fixed {
+  position: fixed;
+}
+
+.themeButton {
+  background: var(--grey-300);
+  position: fixed;
+  height: 3.5rem;
+  width: 3.5rem;
+  top: 100%;
+  transform: translateY(-100%);
+  font-size: 1.8rem;
+  cursor: pointer;
+  border: none;
+  border-top-right-radius: 1rem;
+  box-shadow: 0 0 4px 4px var(--grey-400);
+  padding: 0;
+
+  transition: height 100ms, width 100ms;
+}
+
+.themeButton:hover {
+  height: 3.7rem;
+  width: 3.7rem;
+}
+
+.contents {
+  width: inherit;
+  max-width: inherit;
+}
+
+.modelsList > li {
+  border-top: 1px solid var(--borders);
+  padding: 0.3rem;
+}
+
+summary {
+  cursor: pointer;
+}
+
+summary:hover {
+  text-decoration: underline;
+}

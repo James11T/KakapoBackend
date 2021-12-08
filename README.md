@@ -5,4 +5,4 @@ RESTful API made with ExpressJS and MySQL
 I wrote my own ORM (for some reason) that works (most of the time).
 
 ## API Documentation
-API documentation can be found in the [docs.html](/docs.html "Kakapo API Docs") file.
+API documentation can be found in the [docs.html](/apidocs/docs.html "Kakapo API Docs") file.
