@@ -100,10 +100,10 @@ const getAllUsers = async (req, res) => {
 const getStaffUserRoutes = () => {
   const router = express.Router();
 
-  router.get("/getuser", getUserAtSensitivity(50));
+  router.get("/", getUserAtSensitivity(50));
   router.get("/getuserdata", resolveUserMiddleware, getFullUserData);
-  router.get("/getusers", getUsers);
-  router.get("/getallusers", isRank(process.env.ELEVATED_DEVELOPER), getAllUsers);
+  router.get("/range", getUsers);
+  router.get("/all", isRank(process.env.ELEVATED_DEVELOPER), getAllUsers);
 
   return router;
 };
