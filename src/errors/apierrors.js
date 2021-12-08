@@ -42,65 +42,72 @@ class PostNotFoundError extends APIError {
   }
 }
 
+class CommentNotFoundError extends APIError {
+  constructor(errorData) {
+    super("Comment not found.", "103", errorData);
+    this.name = "CommentNotFoundError";
+  }
+}
+
 class UserNotFoundError extends APIError {
   constructor(errorData) {
-    super("User not found.", "103", errorData);
+    super("User not found.", "104", errorData);
     this.name = "UserNotFoundError";
   }
 }
 
 class AlreadyFriendsError extends APIError {
   constructor(errorData) {
-    super("You are already friends with this user.", "104", errorData);
+    super("You are already friends with this user.", "105", errorData);
     this.name = "AlreadyFriendsError";
   }
 }
 
 class NoFriendRequestError extends APIError {
   constructor(errorData) {
-    super("You do not have a friend request from this user.", "105", errorData);
+    super("You do not have a friend request from this user.", "106", errorData);
     this.name = "NoFriendRequestError";
   }
 }
 
 class FileTooLargeError extends APIError {
   constructor(errorData) {
-    super("The uploaded file was too large", "106", errorData);
+    super("The uploaded file was too large", "107", errorData);
     this.name = "FileTooLargeError";
   }
 }
 
 class NotPostOwnerError extends APIError {
   constructor(errorData) {
-    super("You do not own this post", "107", errorData);
+    super("You do not own this post", "108", errorData);
     this.name = "NotPostOwnerError";
   }
 }
 
 class NotCommentOwnerError extends APIError {
   constructor(errorData) {
-    super("You do not own this comment", "108", errorData);
+    super("You do not own this comment", "109", errorData);
     this.name = "NotCommentOwnerError";
   }
 }
 
 class AlreadyLikedError extends APIError {
   constructor(errorData) {
-    super("You have already liked this post", "109", errorData);
+    super("You have already liked this post", "110", errorData);
     this.name = "AlreadyLikedError";
   }
 }
 
 class NotLikedError extends APIError {
   constructor(errorData) {
-    super("You have not liked this post", "110", errorData);
+    super("You have not liked this post", "111", errorData);
     this.name = "NotLikedError";
   }
 }
 
 class CommentNotFoundError extends APIError {
   constructor(errorData) {
-    super("Comment not found", "111", errorData);
+    super("Comment not found", "112", errorData);
     this.name = "CommentNotFoundError";
   }
 }

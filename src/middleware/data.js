@@ -1,33 +1,48 @@
 import { checkRequiredParameters } from "../utils.js";
-import { sendError, MissingParametersError, GenericError, PostNotFoundError } from "../errors/apierrors.js";
+import {
+  sendError,
+  MissingParametersError,
+  GenericError,
+  PostNotFoundError,
+  CommentNotFoundError,
+} from "../errors/apierrors.js";
 
-const resolvePostMiddleware = async (req, res, next) => {
+const resolvePublicID = (table, field, error) => {
   /**
-   * Middleware to definitively resolve a post and append it to the requests
-   * Used to prevent repetition in the functions tha require a post o be sent
-   * in the body
+   * Dynamic middleware to definitively resolve a table row and append it to the requests
+   * Used to prevent repetition in the functions that require data in the body
+   *
+   * @param {string} table The table to query
+   * @param {string} field The body field to check body
+   * @param {APIError} error The error to dispatch if the resolve fails
    * 
-   * @param {string} req.post_id The public ID of the post to fetch
+   * @return {function} The middleware to use
    */
-  const [hasRequiredParameters, missingParameters] = checkRequiredParameters(req.body, ["post_id"]);
-  if (!hasRequiredParameters) {
-    return sendError(res, new MissingParametersError({ missingParameters: missingParameters }));
-  }
 
-  const { post_id } = req.body;
+  return async (req, res, next) => {
+    const [hasRequiredParameters, missingParameters] = checkRequiredParameters(req.body, [field]);
+    if (!hasRequiredParameters) {
+      return sendError(res, new MissingParametersError({ missingParameters: missingParameters }));
+    }
 
-  const [getPostError, post] = await global.db.table("post").first("*", { public_id: post_id });
-  if (getPostError) {
-    return sendError(res, new GenericError());
-  }
+    const fieldValue = req.body[field];
 
-  if (!post) {
-    return sendError(res, new PostNotFoundError());
-  }
+    const [getPostError, result] = await global.db.table(table).first("*", { public_id: fieldValue });
+    if (getPostError) {
+      return sendError(res, new GenericError());
+    }
 
-  req.post = post;
+    if (!result) {
+      return sendError(res, new error());
+    }
 
-  return next();
+    req[table] = result;
+
+    return next();
+  };
 };
 
-export { resolvePostMiddleware };
+const resolvePostMiddleware = resolvePublicID("post", "post_id", PostNotFoundError);
+const resolveCommentMiddleware = resolvePublicID("comment", "comment_id", CommentNotFoundError);
+
+export { resolvePostMiddleware, resolveCommentMiddleware, resolvePublicID };
