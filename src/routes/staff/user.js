@@ -55,7 +55,7 @@ const getUsers = async (req, res) => {
    *   /user/getusers?from=7
    */
 
-  let { from = 0, count = 20 } = req.query;
+  let { from = 0, count = 20 } = req.body;
 
   try {
     from = Number(from);
