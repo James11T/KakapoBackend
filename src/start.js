@@ -18,11 +18,13 @@ const startApp = async (apiBase, port = process.env.API_PORT) => {
   const db = new DBWrapper();
   global.db = db;
 
+  /*let tableSuccess = models.reduce(async (prev, curr) => {
+    return prev && (await db.registerTable(curr));
+  }, true);*/
+
   // Register all tables with the database
   // Create them if they dont exist
-  let tableSuccess = models.reduce(async (prev, curr) => {
-    return prev && (await db.registerTable(curr));
-  }, true);
+  let tableSuccess = db.registerTables(models);
 
   // Tables failed
   if (!tableSuccess) {

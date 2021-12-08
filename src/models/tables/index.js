@@ -6,4 +6,4 @@ import friendshipModel from "./friendship.model.js";
 import likeModel from "./like.model.js";
 import commentModel from "./comment.model.js";
 
-export default [userModel, postModel, friendRequestModel, postTag, friendshipModel, likeModel, commentModel];
+export default [userModel, friendRequestModel, friendshipModel, postModel, postTag, likeModel, commentModel];

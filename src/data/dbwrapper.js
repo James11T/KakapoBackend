@@ -65,26 +65,31 @@ class DBWrapper {
   }
 
   /**
-   * Initialise a table from database
-   * Create it if it doesnt exist already
    *
-   * @param {Table} table The table model to be registered
+   * @param {Table[]} tables An array of table models to contruct and add to the database
    *
-   * @returns {boolean} Wether the database successfully handled the request
+   * @returns {boolean} True if all tables were successfully initialised
    */
-  async registerTable(table) {
-    // Construct the table
-    const newTable = table(this);
-    this.tables[newTable.name] = newTable;
+  async registerTables(tables) {
+    let success = true;
 
-    const createTableString = newTable.buildCreateTableString();
-    const [createTableError, _] = await this.query(createTableString);
-    if (createTableError) {
-      console.log(createTableError);
-      return false;
-    }
+    this.pool.getConnection((err, connection) => {
+      tables.forEach((table) => {
+        const newTable = table(this);
+        this.tables[newTable.name] = newTable;
 
-    return true;
+        const createTableString = newTable.buildCreateTableString();
+        try {
+          connection.query(createTableString);
+        } catch {
+          success = false;
+        }
+      });
+
+      connection.release();
+    });
+
+    return success;
   }
 
   /**
