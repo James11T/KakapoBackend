@@ -105,13 +105,6 @@ class NotLikedError extends APIError {
   }
 }
 
-class CommentNotFoundError extends APIError {
-  constructor(errorData) {
-    super("Comment not found", "112", errorData);
-    this.name = "CommentNotFoundError";
-  }
-}
-
 class GenericError extends APIError {
   constructor(errorData) {
     super("Server error.", "200", errorData);
