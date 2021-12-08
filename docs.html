@@ -1,0 +1,194 @@
+<!DOCTYPE html><html lang=en> <head><meta charset=UTF-8><meta http-equiv=X-UA-Compatible content="IE=edge"><meta name=viewport content="width=device-width, initial-scale=1.0"><title>Kakapo API</title><link rel=stylesheet href=style.css><script src=prettify.js></script><link rel="shortcut icon" href=icon.png type=image/png></head> <body> <main> <div> <div class="fixed contents"> <h3 class=root>/api/v1</h3> <ul class=endpointList> <li> <details open> <summary>/auth</summary> <ul> <li><a class=httpPost href=#.post.auth.signin>/signin</a></li><li><a class=httpPost href=#.post.auth.signup>/signup</a></li> </ul> </details> </li><li> <details open> <summary>/user</summary> <ul> <li><a class=httpGet href=#.get.user>/</a></li><li><a class=httpGet href=#.get.user.me>/me</a></li><li><a class=httpGet href=#.get.user.idtaken>/idtaken</a></li><li><a class=httpGet href=#.get.user.count>/count</a></li><li> <details open> <summary>/friend</summary> <ul> <li><a class=httpGet href=#.get.user.friend>/</a></li><li><a class=httpPost href=#.post.user.friend.send>/send</a></li><li><a class=httpPost href=#.post.user.friend.accept>/accept</a></li> </ul> </details> </li> </ul> </details> </li><li> <details open> <summary>/staff</summary> <ul> <li> <details open> <summary>/user</summary> <ul> <li><a class=httpGet href=#.get.staff.user>/</a></li><li><a class=httpGet href=#.get.staff.user.getusers>/getusers</a></li><li><a class=httpGet href=#.get.staff.user.getallusers>/getallusers</a></li><li><a class=httpGet href=#.get.staff.user.getuserdata>/getuserdata</a></li> </ul> </details> </li><li> <details open> <summary>/post</summary> <ul> <li><a class=httpDelete href=#.delete.staff.post>/</a></li> </ul> </details> </li> </ul> </details> </li><li> <details open> <summary>/post</summary> <ul> <li><a class=httpPost href=#.post.post>/</a></li><li><a class=httpGet href=#.get.post>/</a></li><li><a class=httpDelete href=#.delete.post>/</a></li><li><a class=httpPut href=#.put.post>/</a></li><li> <details open> <summary>/like</summary> <ul> <li><a class=httpGet href=#.get.post.like>/</a></li><li><a class=httpPost href=#.post.post.like>/</a></li><li><a class=httpDelete href=#.delete.post.like>/</a></li> </ul> </details> </li><li> <details open> <summary>/comment</summary> <ul> <li><a class=httpGet href=#.get.post.comment>/</a></li><li><a class=httpPost href=#.post.post.comment>/</a></li><li><a class=httpDelete href=#.delete.post.comment>/</a></li><li><a class=httpPut href=#.put.post.comment>/</a></li><li><a class=httpGet href=#.get.post.comment.range>/range</a></li><li><a class=httpGet href=#.get.post.comment.count>/count</a></li> </ul> </details> </li><li> <details open> <summary>/repost</summary> <ul> <li><a class=httpPost href=#.post.post.repost>/</a></li> </ul> </details> </li> </ul> </details> </li><li> <details open> <summary>/explore</summary> <ul> <li><a class=httpGet href=#.get.explore.posts>/posts</a></li><li><a class=httpGet href=#.get.explore.people>/people</a></li><li><a class=httpGet href=#.get.explore.tags>/tags</a></li> </ul> </details> </li> </ul> </div> </div> <div> <ul class=docslist> <li id=.post.auth.signin> <div class=endpointdoc> <div> <h2 class="httpPost endpointTitle">/auth/signin</h2> <h4 class=mute>Rank Required: 0</h4> </div> <div> <h3>Description</h3> <p> Check the password against the database for the given Kakapo ID. If correct return a JWT for future authentication. </p> </div> <div> <h3>Parameters</h3> <table> <tr> <th>Name</th> <th>Type</th> <th>Default</th> <th>Description</th> </tr> <tr> <td>kakapo_id</td> <td>string</td> <td></td> <td>A unqiue identifier for the user</td> </tr><tr> <td>password</td> <td>string</td> <td></td> <td>Password in plain text</td> </tr> </table> </div> <div> <h3>Response</h3> <div class=codeContainer> <pre class=prettyprint>
+      {
+  "token": string
+}
+    </pre> </div> </div> </div> </li> <li id=.post.auth.signup> <div class=endpointdoc> <div> <h2 class="httpPost endpointTitle">/auth/signup</h2> <h4 class=mute>Rank Required: 0</h4> </div> <div> <h3>Description</h3> <p> Create a new account with the given data if the Kakapo ID is available. </p> </div> <div> <h3>Parameters</h3> <table> <tr> <th>Name</th> <th>Type</th> <th>Default</th> <th>Description</th> </tr> <tr> <td>kakapo_id</td> <td>string</td> <td></td> <td>A unqiue identifier for the user</td> </tr><tr> <td>email</td> <td>string</td> <td></td> <td>The email to link the new account to</td> </tr><tr> <td>password</td> <td>string</td> <td></td> <td>Password in plain text</td> </tr> </table> </div> <div> <h3>Response</h3> <div class=codeContainer> <pre class=prettyprint>
+      {
+  "message": "Account created successfully."
+}
+    </pre> </div> </div> </div> </li> <li id=.get.user> <div class=endpointdoc> <div> <h2 class="httpGet endpointTitle">/user</h2> <h4 class=mute>Rank Required: 0</h4> </div> <div> <h3>Description</h3> <p> Get a user from Kakapo ID </p> </div> <div> <h3>Parameters</h3> <table> <tr> <th>Name</th> <th>Type</th> <th>Default</th> <th>Description</th> </tr> <tr> <td>kakapo_id</td> <td>string</td> <td></td> <td>A unqiue identifier for a user</td> </tr> </table> </div> <div> <h3>Response</h3> <div class=codeContainer> <pre class=prettyprint>
+      {
+  "user": User
+}
+    </pre> </div> </div> </div> </li> <li id=.get.user.me> <div class=endpointdoc> <div> <h2 class="httpGet endpointTitle">/user/me</h2> <h4 class=mute>Rank Required: 0</h4> <h4 class=mute>Authentication Required</h4> </div> <div> <h3>Description</h3> <p> Get the currently authenticated user data. </p> </div> <div> <h3>Response</h3> <div class=codeContainer> <pre class=prettyprint>
+      {
+  "user": User
+}
+    </pre> </div> </div> </div> </li> <li id=.get.user.idtaken> <div class=endpointdoc> <div> <h2 class="httpGet endpointTitle">/user/idtaken</h2> <h4 class=mute>Rank Required: 0</h4> </div> <div> <h3>Description</h3> <p> Check if the given Kakapo ID is already taken. </p> </div> <div> <h3>Parameters</h3> <table> <tr> <th>Name</th> <th>Type</th> <th>Default</th> <th>Description</th> </tr> <tr> <td>kakapo_id</td> <td>string</td> <td></td> <td>A unqiue identifier for a user</td> </tr> </table> </div> <div> <h3>Response</h3> <div class=codeContainer> <pre class=prettyprint>
+      {
+  "taken": boolean
+}
+    </pre> </div> </div> </div> </li> <li id=.get.user.count> <div class=endpointdoc> <div> <h2 class="httpGet endpointTitle">/user/count</h2> <h4 class=mute>Rank Required: 0</h4> </div> <div> <h3>Description</h3> <p> Get the current ammount of registered Kakapo users. </p> </div> <div> <h3>Response</h3> <div class=codeContainer> <pre class=prettyprint>
+      {
+  "count": int
+}
+    </pre> </div> </div> </div> </li> <li id=.get.user.friend> <div class=endpointdoc> <div> <h2 class="httpGet endpointTitle">/user/friend</h2> <h4 class=mute>Rank Required: 0</h4> </div> <div> <h3>Description</h3> <p> Get the current friend count of the given user. </p> </div> <div> <h3>Parameters</h3> <table> <tr> <th>Name</th> <th>Type</th> <th>Default</th> <th>Description</th> </tr> <tr> <td>kakapo_id</td> <td>string</td> <td></td> <td>The unqiue identifier for the user</td> </tr> </table> </div> <div> <h3>Response</h3> <div class=codeContainer> <pre class=prettyprint>
+      {
+  "count": int
+}
+    </pre> </div> </div> </div> </li> <li id=.post.user.friend.send> <div class=endpointdoc> <div> <h2 class="httpPost endpointTitle">/user/friend/send</h2> <h4 class=mute>Rank Required: 0</h4> <h4 class=mute>Authentication Required</h4> </div> <div> <h3>Description</h3> <p> Send a friend request to the given user as the currently authenticated user. </p> </div> <div> <h3>Parameters</h3> <table> <tr> <th>Name</th> <th>Type</th> <th>Default</th> <th>Description</th> </tr> <tr> <td>kakapo_id</td> <td>string</td> <td></td> <td>The unqiue identifier for the user</td> </tr> </table> </div> <div> <h3>Response</h3> <div class=codeContainer> <pre class=prettyprint>
+      {
+  "success": boolean
+}
+    </pre> </div> </div> </div> </li> <li id=.post.user.friend.accept> <div class=endpointdoc> <div> <h2 class="httpPost endpointTitle">/user/friend/accept</h2> <h4 class=mute>Rank Required: 0</h4> <h4 class=mute>Authentication Required</h4> </div> <div> <h3>Description</h3> <p> Accept a friend request from a user as the currently authenticated user. </p> </div> <div> <h3>Parameters</h3> <table> <tr> <th>Name</th> <th>Type</th> <th>Default</th> <th>Description</th> </tr> <tr> <td>kakapo_id</td> <td>string</td> <td></td> <td>The unqiue identifier for the user</td> </tr> </table> </div> <div> <h3>Response</h3> <div class=codeContainer> <pre class=prettyprint>
+      {
+  "success": boolean
+}
+    </pre> </div> </div> </div> </li> <li id=.get.staff.user> <div class=endpointdoc> <div> <h2 class="httpGet endpointTitle">/staff/user</h2> <h4 class=mute>Rank Required: 50</h4> <h4 class=mute>Authentication Required</h4> </div> <div> <h3>Description</h3> <p> Equivalent to GET /user but with a sensitivity level of 50. </p> </div> <div> <h3>Response</h3> <div class=codeContainer> <pre class=prettyprint>
+      {
+  "user": User
+}
+    </pre> </div> </div> </div> </li> <li id=.get.staff.user.getusers> <div class=endpointdoc> <div> <h2 class="httpGet endpointTitle">/staff/user/getusers</h2> <h4 class=mute>Rank Required: 70</h4> <h4 class=mute>Authentication Required</h4> </div> <div> <h3>Description</h3> <p> Get a list of 'count' users, starting from the 'from'th entry. </p> </div> <div> <h3>Parameters</h3> <table> <tr> <th>Name</th> <th>Type</th> <th>Default</th> <th>Description</th> </tr> <tr> <td>from</td> <td>int</td> <td>0</td> <td>The nth user in the database</td> </tr><tr> <td>count</td> <td>int</td> <td>10</td> <td>The ammount of users to request</td> </tr> </table> </div> <div> <h3>Response</h3> <div class=codeContainer> <pre class=prettyprint>
+      {
+  "users": [
+    User,
+    ...
+  ]
+}
+    </pre> </div> </div> </div> </li> <li id=.get.staff.user.getallusers> <div class=endpointdoc> <div> <h2 class="httpGet endpointTitle">/staff/user/getallusers</h2> <h4 class=mute>Rank Required: 120</h4> <h4 class=mute>Authentication Required</h4> </div> <div> <h3>Description</h3> <p> Get a list of all users. </p> </div> <div> <h3>Response</h3> <div class=codeContainer> <pre class=prettyprint>
+      {
+  "users": [
+    User,
+    ...
+  ]
+}
+    </pre> </div> </div> </div> </li> <li id=.get.staff.user.getuserdata> <div class=endpointdoc> <div> <h2 class="httpGet endpointTitle">/staff/user/getuserdata</h2> <h4 class=mute>Rank Required: 50</h4> <h4 class=mute>Authentication Required</h4> </div> <div> <h3>Description</h3> <p> Get all user data at sensitivity level of 50 along with extra data like post count, friend count. </p> </div> <div> <h3>Response</h3> <div class=codeContainer> <pre class=prettyprint>
+      {
+  "user": User
+}
+    </pre> </div> </div> </div> </li> <li id=.delete.staff.post> <div class=endpointdoc> <div> <h2 class="httpDelete endpointTitle">/staff/post</h2> <h4 class=mute>Rank Required: 50</h4> <h4 class=mute>Authentication Required</h4> </div> <div> <h3>Description</h3> <p> Deletes a given Kakapo post. </p> </div> <div> <h3>Response</h3> <div class=codeContainer> <pre class=prettyprint>
+      {
+  "success": boolean
+}
+    </pre> </div> </div> </div> </li> <li id=.post.post> <div class=endpointdoc> <div> <h2 class="httpPost endpointTitle">/post</h2> <h4 class=mute>Rank Required: 0</h4> <h4 class=mute>Authentication Required</h4> </div> <div> <h3>Description</h3> <p> Create a new post on Kakapo and return the location as a URL. </p> </div> <div> <h3>Response</h3> <div class=codeContainer> <pre class=prettyprint>
+      {
+  "location": string
+}
+    </pre> </div> </div> </div> </li> <li id=.get.post> <div class=endpointdoc> <div> <h2 class="httpGet endpointTitle">/post</h2> <h4 class=mute>Rank Required: 0</h4> </div> <div> <h3>Description</h3> <p> Get post data for a given post public ID. </p> </div> <div> <h3>Parameters</h3> <table> <tr> <th>Name</th> <th>Type</th> <th>Default</th> <th>Description</th> </tr> <tr> <td>post_id</td> <td>string</td> <td></td> <td>The public ID of a post on Kakapo</td> </tr> </table> </div> <div> <h3>Response</h3> <div class=codeContainer> <pre class=prettyprint>
+      {
+  "post": Post
+}
+    </pre> </div> </div> </div> </li> <li id=.delete.post> <div class=endpointdoc> <div> <h2 class="httpDelete endpointTitle">/post</h2> <h4 class=mute>Rank Required: 0</h4> <h4 class=mute>Authentication Required</h4> </div> <div> <h3>Description</h3> <p> Delete a Kakakpo post if it was created by the authenticated user. </p> </div> <div> <h3>Parameters</h3> <table> <tr> <th>Name</th> <th>Type</th> <th>Default</th> <th>Description</th> </tr> <tr> <td>post_id</td> <td>string</td> <td></td> <td>The public ID of the post on Kakapo</td> </tr> </table> </div> <div> <h3>Response</h3> <div class=codeContainer> <pre class=prettyprint>
+      {
+  "success": boolean
+}
+    </pre> </div> </div> </div> </li> <li id=.put.post> <div class=endpointdoc> <div> <h2 class="httpPut endpointTitle">/post</h2> <h4 class=mute>Rank Required: 0</h4> <h4 class=mute>Authentication Required</h4> </div> <div> <h3>Description</h3> <p> Edit a given posts caption if it belongs to the current authenticated user and return the new caption. </p> </div> <div> <h3>Parameters</h3> <table> <tr> <th>Name</th> <th>Type</th> <th>Default</th> <th>Description</th> </tr> <tr> <td>post_id</td> <td>string</td> <td></td> <td>The public ID of the post on Kakapo</td> </tr> </table> </div> <div> <h3>Response</h3> <div class=codeContainer> <pre class=prettyprint>
+      {
+  "success": boolean
+  "content": string
+}
+    </pre> </div> </div> </div> </li> <li id=.get.post.like> <div class=endpointdoc> <div> <h2 class="httpGet endpointTitle">/post/like</h2> <h4 class=mute>Rank Required: 0</h4> </div> <div> <h3>Description</h3> <p> Gets the like count on a given post. </p> </div> <div> <h3>Parameters</h3> <table> <tr> <th>Name</th> <th>Type</th> <th>Default</th> <th>Description</th> </tr> <tr> <td>post_id</td> <td>string</td> <td></td> <td>The public ID of a post on Kakapo</td> </tr> </table> </div> <div> <h3>Response</h3> <div class=codeContainer> <pre class=prettyprint>
+      {
+  "count": int
+}
+    </pre> </div> </div> </div> </li> <li id=.post.post.like> <div class=endpointdoc> <div> <h2 class="httpPost endpointTitle">/post/like</h2> <h4 class=mute>Rank Required: 0</h4> <h4 class=mute>Authentication Required</h4> </div> <div> <h3>Description</h3> <p> Likes the given post as the current authenticated user and returns the new like count. </p> </div> <div> <h3>Parameters</h3> <table> <tr> <th>Name</th> <th>Type</th> <th>Default</th> <th>Description</th> </tr> <tr> <td>post_id</td> <td>string</td> <td></td> <td>The public ID of a post on Kakapo</td> </tr> </table> </div> <div> <h3>Response</h3> <div class=codeContainer> <pre class=prettyprint>
+      {
+  "success": boolean,
+  "count": int
+}
+    </pre> </div> </div> </div> </li> <li id=.delete.post.like> <div class=endpointdoc> <div> <h2 class="httpDelete endpointTitle">/post/like</h2> <h4 class=mute>Rank Required: 0</h4> <h4 class=mute>Authentication Required</h4> </div> <div> <h3>Description</h3> <p> Unlikes the given post as the current authenticated user and return the new like count. </p> </div> <div> <h3>Parameters</h3> <table> <tr> <th>Name</th> <th>Type</th> <th>Default</th> <th>Description</th> </tr> <tr> <td>post_id</td> <td>string</td> <td></td> <td>The public ID of a post on Kakapo</td> </tr> </table> </div> <div> <h3>Response</h3> <div class=codeContainer> <pre class=prettyprint>
+      {
+  "success": boolean,
+  "count": int
+}
+    </pre> </div> </div> </div> </li> <li id=.get.post.comment> <div class=endpointdoc> <div> <h2 class="httpGet endpointTitle">/post/comment</h2> <h4 class=mute>Rank Required: 0</h4> </div> <div> <h3>Description</h3> <p> Get a comment on a Kakapo post. </p> </div> <div> <h3>Parameters</h3> <table> <tr> <th>Name</th> <th>Type</th> <th>Default</th> <th>Description</th> </tr> <tr> <td>comment_id</td> <td>string</td> <td></td> <td>The public ID of a comment on Kakapo</td> </tr> </table> </div> <div> <h3>Response</h3> <div class=codeContainer> <pre class=prettyprint>
+      {
+  "comment": Comment
+}
+    </pre> </div> </div> </div> </li> <li id=.post.post.comment> <div class=endpointdoc> <div> <h2 class="httpPost endpointTitle">/post/comment</h2> <h4 class=mute>Rank Required: 0</h4> <h4 class=mute>Authentication Required</h4> </div> <div> <h3>Description</h3> <p> Creates a new comment on the given post as the authenticated user and returns the new comment count. </p> </div> <div> <h3>Parameters</h3> <table> <tr> <th>Name</th> <th>Type</th> <th>Default</th> <th>Description</th> </tr> <tr> <td>post_id</td> <td>string</td> <td></td> <td>The public ID of a post on Kakapo</td> </tr> </table> </div> <div> <h3>Response</h3> <div class=codeContainer> <pre class=prettyprint>
+      {
+  "success": boolean,
+  "comment": Comment
+}
+    </pre> </div> </div> </div> </li> <li id=.delete.post.comment> <div class=endpointdoc> <div> <h2 class="httpDelete endpointTitle">/post/comment</h2> <h4 class=mute>Rank Required: 0</h4> <h4 class=mute>Authentication Required</h4> </div> <div> <h3>Description</h3> <p> Removes a comment on the given post if it was created by the authenticated user and returns the new comment count. </p> </div> <div> <h3>Parameters</h3> <table> <tr> <th>Name</th> <th>Type</th> <th>Default</th> <th>Description</th> </tr> <tr> <td>post_id</td> <td>string</td> <td></td> <td>The public ID of a post on Kakapo</td> </tr> </table> </div> <div> <h3>Response</h3> <div class=codeContainer> <pre class=prettyprint>
+      {
+  "success": boolean,
+  "count": int
+}
+    </pre> </div> </div> </div> </li> <li id=.put.post.comment> <div class=endpointdoc> <div> <h2 class="httpPut endpointTitle">/post/comment</h2> <h4 class=mute>Rank Required: 0</h4> <h4 class=mute>Authentication Required</h4> </div> <div> <h3>Description</h3> <p> Edits the content of a comment is it was made by the authenticated user. </p> </div> <div> <h3>Parameters</h3> <table> <tr> <th>Name</th> <th>Type</th> <th>Default</th> <th>Description</th> </tr> <tr> <td>comment_id</td> <td>string</td> <td></td> <td>The public ID of a comment on a Kakapo post</td> </tr> </table> </div> <div> <h3>Response</h3> <div class=codeContainer> <pre class=prettyprint>
+      {
+  "success": boolean
+}
+    </pre> </div> </div> </div> </li> <li id=.get.post.comment.range> <div class=endpointdoc> <div> <h2 class="httpGet endpointTitle">/post/comment/range</h2> <h4 class=mute>Rank Required: 0</h4> <h4 class=mute>Authentication Required</h4> </div> <div> <h3>Description</h3> <p> Get 'count' ammount of comments starting from the 'from'th entry on a given post. </p> </div> <div> <h3>Parameters</h3> <table> <tr> <th>Name</th> <th>Type</th> <th>Default</th> <th>Description</th> </tr> <tr> <td>post_id</td> <td>string</td> <td></td> <td>The public ID of a post on Kakapo</td> </tr><tr> <td>from</td> <td>number</td> <td>0</td> <td>Where to start the query from</td> </tr><tr> <td>count</td> <td>number</td> <td>10</td> <td>The ammount of comments to retireve</td> </tr> </table> </div> <div> <h3>Response</h3> <div class=codeContainer> <pre class=prettyprint>
+      {
+  "comments": [
+    Comment,
+    ...
+  ]
+}
+    </pre> </div> </div> </div> </li> <li id=.get.post.comment.count> <div class=endpointdoc> <div> <h2 class="httpGet endpointTitle">/post/comment/count</h2> <h4 class=mute>Rank Required: 0</h4> </div> <div> <h3>Description</h3> <p> Count the ammount of comments on a given Kakapo post. </p> </div> <div> <h3>Parameters</h3> <table> <tr> <th>Name</th> <th>Type</th> <th>Default</th> <th>Description</th> </tr> <tr> <td>post_id</td> <td>string</td> <td></td> <td>The public ID of a post on Kakapo</td> </tr> </table> </div> <div> <h3>Response</h3> <div class=codeContainer> <pre class=prettyprint>
+      {
+  "count": int
+}
+    </pre> </div> </div> </div> </li> <li id=.post.post.repost> <div class=endpointdoc> <div> <h2 class="httpPost endpointTitle">/post/repost</h2> <h4 class=mute>Rank Required: 0</h4> <h4 class=mute>Authentication Required</h4> </div> <div> <h3>Description</h3> <p> Repost a Kakapo post as the currently authenticated user. </p> </div> <div> <h3>Parameters</h3> <table> <tr> <th>Name</th> <th>Type</th> <th>Default</th> <th>Description</th> </tr> <tr> <td>post_id</td> <td>string</td> <td></td> <td>The public ID of a post on Kakapo</td> </tr> </table> </div> <div> <h3>Response</h3> <div class=codeContainer> <pre class=prettyprint>
+      {
+  "success": boolean,
+  "location": string
+}
+    </pre> </div> </div> </div> </li> <li id=.get.explore.posts> <div class=endpointdoc> <div> <h2 class="httpGet endpointTitle">/explore/posts</h2> <h4 class=mute>Rank Required: 0</h4> </div> <div> <h3>Description</h3> <p> Retrieve 'count' number of posts following the given criteria. </p> </div> <div> <h3>Parameters</h3> <table> <tr> <th>Name</th> <th>Type</th> <th>Default</th> <th>Description</th> </tr> <tr> <td>count</td> <td>int</td> <td>10</td> <td>The ammount of entries to retrieve, max 30.</td> </tr><tr> <td>query</td> <td>string</td> <td></td> <td>The criteria to find posts by.</td> </tr> </table> </div> <div> <h3>Response</h3> <div class=codeContainer> <pre class=prettyprint>
+      {
+  "posts": [
+    Post,
+    ...
+  ]
+}
+    </pre> </div> </div> </div> </li> <li id=.get.explore.people> <div class=endpointdoc> <div> <h2 class="httpGet endpointTitle">/explore/people</h2> <h4 class=mute>Rank Required: 0</h4> </div> <div> <h3>Description</h3> <p> Retrieve 'count' number of users following the given criteria. </p> </div> <div> <h3>Parameters</h3> <table> <tr> <th>Name</th> <th>Type</th> <th>Default</th> <th>Description</th> </tr> <tr> <td>count</td> <td>int</td> <td>10</td> <td>The ammount of entries to retrieve, max 30.</td> </tr><tr> <td>query</td> <td>string</td> <td></td> <td>The criteria to find posts by.</td> </tr> </table> </div> <div> <h3>Response</h3> <div class=codeContainer> <pre class=prettyprint>
+      {
+  "users": [
+    User,
+    ...
+  ]
+}
+    </pre> </div> </div> </div> </li> <li id=.get.explore.tags> <div class=endpointdoc> <div> <h2 class="httpGet endpointTitle">/explore/tags</h2> <h4 class=mute>Rank Required: 0</h4> </div> <div> <h3>Description</h3> <p> Retrieve 'count' number of posts that contain some of the given tags. </p> </div> <div> <h3>Parameters</h3> <table> <tr> <th>Name</th> <th>Type</th> <th>Default</th> <th>Description</th> </tr> <tr> <td>count</td> <td>int</td> <td>10</td> <td>The ammount of entries to retrieve, max 30.</td> </tr><tr> <td>query</td> <td>string</td> <td></td> <td>The criteria to find posts by.</td> </tr> </table> </div> <div> <h3>Response</h3> <div class=codeContainer> <pre class=prettyprint>
+      {
+  "users": [
+    User,
+    ...
+  ]
+}
+    </pre> </div> </div> </div> </li> </ul> </div> <div> <h2>Models</h2> <p>Not all field are gauranteed as they may be subject to sensitivity filters for specific endpoints.</p> <ul class=modelsList> <li> <h3>User</h3> <p>Represents a Kakapo platform user.</p> <div class=codeContainer> <pre class=prettyprint>{
+  "kakapo_id": string,
+  "display_name": string,
+  "email": string,
+  "about": string,
+  "rank": int,
+  "badge": int,
+  "joined": int,
+  "last_online": int,
+  "pfp": string,
+  "socials": Array&lt;string&gt;,
+  "muted_until": int,
+  "banned_until": int,
+  "deleted": boolean,
+  "public_id": string
+}</pre> </div> </li> <li> <h3>PostTag</h3> <p>Represents a tag that is attached to a Kakapo post to provide added description.</p> <div class=codeContainer> <pre class=prettyprint>{
+  "tag": string,
+  "post_id": int
+}</pre> </div> </li> <li> <h3>Post</h3> <p>Represents a Kakapo post.</p> <div class=codeContainer> <pre class=prettyprint>{
+  "id": string,
+  "author": int,
+  "media": string,
+  "content": string,
+  "sent_at": int
+}</pre> </div> </li> <li> <h3>FriendRequest</h3> <p>Represents a friend request between two Kakapo users.</p> <div class=codeContainer> <pre class=prettyprint>{
+  "from": int,
+  "to": int,
+  "sent_at": int,
+  "accepted": boolean
+}</pre> </div> </li> <li> <h3>Comment</h3> <p>Represents a comment on a Kakapo Post</p> <div class=codeContainer> <pre class=prettyprint>{
+  "id": string,
+  "content": string,
+  "created_at": int
+}</pre> </div> </li> </ul> </div> </main> <button onclick=themeSwitch(); class=themeButton>💡</button> <script>
+      function themeSwitch() {
+        if (document.body.classList.contains("dark")) {
+          localStorage.setItem("theme", "light");
+          document.body.classList.replace("dark", "light");
+        } else {
+          localStorage.setItem("theme", "dark");
+          document.body.classList.replace("light", "dark");
+        }
+      }
+
+      document.body.classList.add(localStorage.getItem("theme") || "dark");
+    </script> </body> </html> 
