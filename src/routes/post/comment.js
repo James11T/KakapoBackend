@@ -8,7 +8,7 @@ import {
   NotCommentOwnerError,
 } from "../../errors/apierrors.js";
 import { checkRequiredParameters } from "../../utils/validations.js";
-import { getEpoch, generatePublicId } from "../../utils/funcs.js";
+import { getEpoch, generatePublicId, clamp } from "../../utils/funcs.js";
 import { isAuthenticated } from "../../middleware/auth.middleware.js";
 import { resolvePostMiddleware, resolveCommentMiddleware } from "../../middleware/data.middleware.js";
 
@@ -29,7 +29,7 @@ const getComment = async (req, res) => {
     return sendError(res, new CommentNotFoundError());
   }
 
-  return res.send({ comment: globa.db.table("comment").filter(comment, 0) });
+  return res.send({ comment: global.db.table("comment").filter(comment, 0) });
 };
 
 const getCommentCount = async (req, res) => {
@@ -57,6 +57,7 @@ const addPostComment = async (req, res) => {
     post: req.post.id,
     content: trimmedContent,
     commented_at: getEpoch(),
+    author: req.authenticatedUser.id,
     public_id: generatePublicId(),
   };
   const [createCommentError] = await global.db.table("comment").new(newComment);
@@ -79,7 +80,7 @@ const deletePostComment = async (req, res) => {
     return sendError(res, new NotCommentOwnerError());
   }
 
-  const [deleteCommentError, deleteCommentResult] = await globa.db.table("comment").delete({ id: req.comment.id });
+  const [deleteCommentError, deleteCommentResult] = await global.db.table("comment").delete({ id: req.comment.id });
   if (deleteCommentError) {
     return sendError(res, new GenericError());
   }
@@ -114,11 +115,6 @@ const editPostComment = async (req, res) => {
 };
 
 const getCommentsInRange = async (req, res) => {
-  const [hasRequiredParameters, missingParameters] = checkRequiredParameters(req.body, ["from", "count"]);
-  if (!hasRequiredParameters) {
-    return sendError(res, new MissingParametersError({ missingParameters: missingParameters }));
-  }
-
   let { from = 0, count = 10 } = req.body;
 
   try {

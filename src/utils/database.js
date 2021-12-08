@@ -1,3 +1,5 @@
+import fs from "fs";
+
 import { GenericError } from "../errors/apierrors.js";
 
 /**
@@ -34,4 +36,23 @@ const usersAreFriends = async (user1, user2) => {
   return [null, !!existingFiendResult];
 };
 
-export { orderedFriendQuery, usersAreFriends };
+/**
+ * Delete a post from the database and file storage
+ *
+ * @param {Post} post The post to delete
+ * @param {boolean} [deleteFile=true] Wether to delete the media file
+ */
+const deletePost = async (post, deleteFile = true) => {
+  const [deletePostError, deletePostResult] = await global.db.table("post").delete({ id: post.id });
+  if (deletePostError) {
+    return [new GenericError(), null];
+  }
+
+  if (deleteFile) {
+    await fs.promises.unlink(`.${req.post.media}`);
+  }
+
+  return [null, deletePostResult];
+};
+
+export { orderedFriendQuery, usersAreFriends, deletePost };

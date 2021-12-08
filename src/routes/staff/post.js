@@ -2,8 +2,10 @@ import express from "express";
 
 import { GenericError, MissingParametersError, PostNotFoundError, sendError } from "../../errors/apierrors.js";
 import { checkRequiredParameters } from "../../utils/validations.js";
+import { deletePost } from "../../utils/database.js";
+import { resolvePostMiddleware } from "../../middleware/data.middleware.js";
 
-const deletePost = async (req, res) => {
+const deletePostEndpoint = async (req, res) => {
   const [hasRequiredParameters, missingParameters] = checkRequiredParameters(req.body, ["post_id"]);
   if (!hasRequiredParameters) {
     return sendError(res, new MissingParametersError({ missingParameters: missingParameters }));
@@ -15,22 +17,22 @@ const deletePost = async (req, res) => {
     return sendError(res, new GenericError());
   }
 
-  if (post) {
-    const [deleteError, deleteResult] = await global.db.table("post").delete({ public_id: post.post_id });
-    if (deleteError) {
-      return sendError(res, new GenericError());
-    }
-
-    return res.send({ success: true });
-  } else {
+  if (!post) {
     return sendError(res, new PostNotFoundError());
   }
+
+  const [deleteError] = await deletePost(req.post);
+  if (deleteError) {
+    return sendError(res, new GenericError());
+  }
+
+  return res.send({ success: true });
 };
 
 const getStaffPostRoutes = () => {
   const router = express.Router();
 
-  router.delete("/post", deletePost);
+  router.delete("/", resolvePostMiddleware, deletePostEndpoint);
 
   return router;
 };

@@ -1,16 +1,16 @@
-import fs from "fs";
 import express from "express";
 import {
+  BadParametersError,
   GenericError,
   MissingParametersError,
   NotPostOwnerError,
-  PostNotFoundError,
   sendError,
 } from "../errors/apierrors.js";
 import { getPostCommentRoutes } from "./post/comment.js";
 import { getPostLikeRoutes } from "./post/like.js";
 import { generatePublicId, getEpoch } from "../utils/funcs.js";
 import { checkRequiredParameters } from "../utils/validations.js";
+import { deletePost } from "../utils/database.js";
 import { isAuthenticated } from "../middleware/auth.middleware.js";
 import { resolvePostMiddleware } from "../middleware/data.middleware.js";
 
@@ -48,17 +48,15 @@ const createPost = async (req, res) => {
   return res.send({ success: true, location: newPost.public_id });
 };
 
-const deletePost = async (req, res) => {
+const deletePostEndpoint = async (req, res) => {
   if (req.post.author.public_id !== req.authenticatedUser.public_id) {
     return sendError(res, new NotPostOwnerError());
   }
 
-  const [deletePostError, deletePostResult] = await global.db.table("post").delete({ public_id: req.post.public_id });
+  const [deletePostError] = await deletePost(req.post);
   if (deletePostError) {
     return sendError(res, new GenericError());
   }
-
-  fs.unlink(`.${req.post.media}`);
 
   return res.send({ success: true });
 };
@@ -68,9 +66,21 @@ const editPost = async (req, res) => {
     return sendError(res, new NotPostOwnerError());
   }
 
+  const [hasRequiredParameters, missingParameters] = checkRequiredParameters(req.body, ["content"]);
+  if (!hasRequiredParameters) {
+    return sendError(res, new MissingParametersError({ missingParameters: missingParameters }));
+  }
+
+  const { content } = req.body;
+
+  const trimmedContent = content.trim();
+  if (trimmedContent.length === 0 || trimmedContent.length > 256) {
+    return sendError(res, new BadParametersError({ badParameters: ["content"] }));
+  }
+
   const [editPostError, editPostResult] = await global.db
     .table("post")
-    .edit({ public_id: req.post.public_id }, { edited: true, content: content });
+    .edit({ public_id: req.post.public_id }, { edited: true, content: trimmedContent });
   if (editPostError) {
     return sendError(res, new GenericError());
   }
@@ -85,7 +95,7 @@ const getPostRoutes = () => {
 
   router.get("/", resolvePostMiddleware, getPost);
   router.post("/", isAuthenticated, createPost);
-  router.delete("/", isAuthenticated, resolvePostMiddleware, deletePost);
+  router.delete("/", isAuthenticated, resolvePostMiddleware, deletePostEndpoint);
   router.put("/", isAuthenticated, resolvePostMiddleware, editPost);
 
   router.post("/repost", isAuthenticated, resolvePostMiddleware, repostPost);

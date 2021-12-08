@@ -1,3 +1,5 @@
+import { clamp } from "./funcs.js";
+
 /**
  * Check an email for validity
  *
@@ -52,8 +54,8 @@ const checkPassword = (password) => {
  *
  * @return {*[boolean, string[]]} Returns a boolean that dictates wether all required parameters are present and an array of missing parameters
  */
- const checkRequiredParameters = (obj, requiredParameters) => {
-  const missingParameters = requiredParameters.filter((requiredParameter) => !obj[requiredParameter], true);
+const checkRequiredParameters = (obj, requiredParameters) => {
+  const missingParameters = requiredParameters.filter((requiredParameter) => obj[requiredParameter] == null, true);
 
   return [missingParameters.length === 0, missingParameters];
 };
