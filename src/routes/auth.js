@@ -49,7 +49,7 @@ const signIn = async (req, res) => {
 };
 
 const signUp = async (req, res) => {
-  if (req.user) {
+  if (req.authenticatedUser) {
     return sendError(res, new IsAuthenticatedError());
   }
 

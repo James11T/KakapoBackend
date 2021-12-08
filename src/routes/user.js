@@ -8,7 +8,7 @@ import { getUserAtSensitivity } from "./shared.js";
 import { getUserFriendRoutes } from "./user/friend.js";
 
 const getMe = async (req, res) => {
-  return res.send({ user: global.db.table("user").filter(req.user, 10) });
+  return res.send({ user: global.db.table("user").filter(req.authenticatedUser, 10) });
 };
 
 const kakapoIDTakenCheck = async (req, res) => {

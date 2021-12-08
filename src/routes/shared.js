@@ -1,4 +1,4 @@
-import { MissingParametersError, NoEntryError, sendError } from "../errors/apierrors.js";
+import { MissingParametersError, UserNotFoundError, sendError } from "../errors/apierrors.js";
 import { checkRequiredParameters } from "../utils.js";
 
 const getUserAtSensitivity = (sensitivity) => {
@@ -16,7 +16,7 @@ const getUserAtSensitivity = (sensitivity) => {
     }
 
     if (!result) {
-      return sendError(res, new NoEntryError());
+      return sendError(res, new UserNotFoundError());
     }
 
     return res.send({ user: global.db.table("user").filter(result, sensitivity) });

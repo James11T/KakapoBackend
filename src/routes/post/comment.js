@@ -1,5 +1,6 @@
 import express from "express";
 import {
+  sendError,
   GenericError,
   MissingParametersError,
   CommentNotFoundError,
@@ -73,7 +74,7 @@ const addPostComment = async (req, res) => {
 };
 
 const deletePostComment = async (req, res) => {
-  if (req.user.id !== req.comment.author.id) {
+  if (req.authenticatedUser.id !== req.comment.author.id) {
     return sendError(res, new NotCommentOwnerError());
   }
 
@@ -86,7 +87,7 @@ const deletePostComment = async (req, res) => {
 };
 
 const editPostComment = async (req, res) => {
-  if (req.user.id !== req.comment.author.id) {
+  if (req.authenticatedUser.id !== req.comment.author.id) {
     return sendError(res, new NotCommentOwnerError());
   }
 

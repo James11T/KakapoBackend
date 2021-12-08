@@ -18,7 +18,7 @@ const authenticateRequest = async (req, res, next) => {
     return next();
   }
 
-  req.user = tokenUser;
+  req.authenticatedUser = tokenUser;
   return next();
 };
 
@@ -26,7 +26,7 @@ const authenticateRequest = async (req, res, next) => {
  * Middleware to check if the user is authenticated
  */
 const isAuthenticated = (req, res, next) => {
-  if (!req.user) {
+  if (!req.authenticatedUser) {
     return sendError(res, new NotAuthenticatedError());
   }
 
@@ -43,11 +43,11 @@ const isAuthenticated = (req, res, next) => {
  */
 const isRank = (minimumRank) => {
   return async (req, res, next) => {
-    if (!req.user) {
+    if (!req.authenticatedUser) {
       return sendError(res, new NotAuthenticatedError());
     }
 
-    if (req.user.rank < minimumRank) {
+    if (req.authenticatedUser.rank < minimumRank) {
       return sendError(res, new RankTooLowError());
     }
 

@@ -32,7 +32,7 @@ const createPost = async (req, res) => {
   req.files.media.mv(`.${fn}`);
 
   let newPost = {
-    author: req.user.id,
+    author: req.authenticatedUser.id,
     media: fn,
     content: content,
     posted_at: getEpoch(),
@@ -48,7 +48,7 @@ const createPost = async (req, res) => {
 };
 
 const deletePost = async (req, res) => {
-  if (req.post.author.public_id !== req.user.public_id) {
+  if (req.post.author.public_id !== req.authenticatedUser.public_id) {
     return sendError(res, new NotPostOwnerError());
   }
 
@@ -63,7 +63,7 @@ const deletePost = async (req, res) => {
 };
 
 const editPost = async (req, res) => {
-  if (req.post.author.public_id !== req.user.public_id) {
+  if (req.post.author.public_id !== req.authenticatedUser.public_id) {
     return sendError(res, new NotPostOwnerError());
   }
 

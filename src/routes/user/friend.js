@@ -1,5 +1,6 @@
 import express from "express";
 import {
+  sendError,
   AlreadyFriendsError,
   GenericError,
   MissingParametersError,
@@ -7,7 +8,7 @@ import {
   UserNotFoundError,
 } from "../../errors/apierrors.js";
 import { isAuthenticated } from "../../middleware/auth.middleware.js";
-import { checkRequiredParameters } from "../../utils.js";
+import { checkRequiredParameters, getEpoch } from "../../utils.js";
 
 const getFriendCount = async (req, res) => {
   const [countError, friendCount] = await global.db.table("friend_request").count();
@@ -35,7 +36,7 @@ const sendFriendRequest = async (req, res) => {
   }
 
   let newFR = {
-    from: req.user.id,
+    from: req.authenticatedUser.id,
     to: user.id,
     sent_at: getEpoch(),
   };
@@ -68,7 +69,7 @@ const acceptFriendRequest = async (req, res) => {
   }
 
   // Check friend request was sent
-  let friendRequestQuery = { from: fromUser.id, to: req.user.id };
+  let friendRequestQuery = { from: fromUser.id, to: req.authenticatedUser.id };
 
   const [getRequestError, friendRequest] = await global.db.table("friend_request").first(["*"], friendRequestQuery);
 
@@ -82,10 +83,10 @@ const acceptFriendRequest = async (req, res) => {
 
   // Check not already friends
   let friendshipQuery;
-  if (req.user.id < fromUser.id) {
-    friendshipQuery = { user1: req.user.id, user2: fromUser.id };
+  if (req.authenticatedUser.id < fromUser.id) {
+    friendshipQuery = { user1: req.authenticatedUser.id, user2: fromUser.id };
   } else {
-    friendshipQuery = { user1: fromUser.id, user2: req.user.id };
+    friendshipQuery = { user1: fromUser.id, user2: req.authenticatedUser.id };
   }
 
   const [getFriendshipError, existingFiendRequest] = await global.db.table("friendship").first(["*"], friendshipQuery);
@@ -117,9 +118,9 @@ const acceptFriendRequest = async (req, res) => {
 const getUserFriendRoutes = () => {
   const router = express.Router();
 
-  router.get("/friend", getFriendCount);
-  router.post("/friend/send", isAuthenticated, sendFriendRequest);
-  router.post("/friend/accept", isAuthenticated, acceptFriendRequest);
+  router.get("/count", getFriendCount);
+  router.post("/send", isAuthenticated, sendFriendRequest);
+  router.post("/accept", isAuthenticated, acceptFriendRequest);
 
   return router;
 };
