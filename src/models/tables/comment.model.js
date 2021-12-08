@@ -1,5 +1,5 @@
 import Table from "../table.js";
-import { NumberField, StringField } from "../fields.js";
+import { NumberField, StringField, BooleanField } from "../fields.js";
 
 const model = (db) =>
   new Table("comment", db, {
