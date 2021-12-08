@@ -2,24 +2,23 @@ import { MissingParametersError, BadParametersError, GenericError } from "../err
 import { checkRequiredParameters, checkEmail, getEpoch, getUUID, checkKakapoId, checkPassword } from "../utils.js";
 import { hashPassword, toPasswordHashString } from "../auth/passwords.js";
 
+/**
+ * Create a new user in the database if all the content checks are valid
+ *
+ * @param {string} data.kakapo_id The desired kakapo_id of the users
+ * @param {string} data.email The email to be associated with the user
+ * @param {string} data.password The desured password for the user
+ * @param {string} [data.display_name=data.kakapo_id] The desired display name of the user
+ *
+ * @returns {[error, result]} The error, if errored, or the result if succeeded
+ */
 const createNewUser = async (data) => {
-  /**
-   * Create a new user in the database if all the content checks are valid
-   *
-   * @param {string} data.kakapo_id The desired kakapo_id of the users
-   * @param {string} data.email The email to be associated with the user
-   * @param {string} data.password The desured password for the user
-   * @param {string} [data.display_name=data.kakapo_id] The desired display name of the user
-   * 
-   * @returns {[error, result]} The error, if errored, or the result if succeeded
-   */
-
   const [hasRequiredParameters, missingParameters] = checkRequiredParameters(data, ["kakapo_id", "email", "password"]);
   if (!hasRequiredParameters) {
     return [new MissingParametersError({ missingParameters: missingParameters }), null];
   }
 
-  let {kakapo_id, email, password, display_name} = data;
+  let { kakapo_id, email, password, display_name } = data;
 
   if (!checkEmail(email)) {
     return [new BadParametersError({ parameter: "email" }), null];

@@ -6,7 +6,6 @@ class Table {
    * @param {DBWrapper} db The database interface
    * @param {BaseField[]} fields The fields of the table
    */
-
   constructor(name, db, fields) {
     this.name = name;
     this.db = db;
@@ -17,23 +16,21 @@ class Table {
     this.references = this.findReferenceFields();
   }
 
+  /**
+   * Get a list of all field that are required for construction
+   *
+   * @return {string[]} The fields that are required for construction
+   */
   getRequiredConstructionFields() {
-    /**
-     * Get a list of all field that are required for construction
-     *
-     * @return {string[]} The fields that are required for construction
-     */
-
     return Object.keys(this.fields).filter((field) => this.fields[field].isRequiredToCreate());
   }
 
+  /**
+   * Find the first primary key for this table
+   *
+   * @return {string} The primary key column name
+   */
   findPrimaryKey() {
-    /**
-     * Find the first primary key for this table
-     *
-     * @return {string} The primary key column name
-     */
-
     let primaryKey;
     Object.keys(this.fields).forEach((field) => {
       if (this.fields[field].primaryKey) {
@@ -44,25 +41,25 @@ class Table {
     return primaryKey;
   }
 
+  /**
+   * Find all columns that are defined as being unique
+   *
+   * @return {string[]} The fields that are defined as being unique
+   */
   findUniqueFields() {
-    /**
-     * Find all columns that are defined as being unique
-     *
-     * @return {string[]} The fields that are defined as being unique
-     */
     const fieldKeys = Object.keys(this.fields);
     const uniqueFields = fieldKeys.filter((field) => !!this.fields[field].unique);
 
     return uniqueFields;
   }
 
-  findReferenceFields() {
-    /**
-     * Find all columns that are defined as being a foreign keys
-     *
-     * @return {string[]} The fields that are defined as being foreign keys
-     */
+  /**
+   * Find all columns that are defined as being a foreign keys
+   *
+   * @return {string[]} The fields that are defined as being foreign keys
+   */
 
+  findReferenceFields() {
     const fieldKeys = Object.keys(this.fields);
     const referenceFields = fieldKeys.filter((field) => !!this.fields[field].reference);
 
@@ -71,15 +68,14 @@ class Table {
 
   ///////////////////////////////////////// UTILITIES /////////////////////////////////////////
 
+  /**
+   * Turns a list of fields into a string for after SELECT
+   * E.g.
+   * ["a", "b"] -> "(`a`, `b`)"
+   *
+   * @return {string} The SQL string
+   */
   fieldsToSelectString(fields) {
-    /**
-     * Turns a list of fields into a string for after SELECT
-     * E.g.
-     * ["a", "b"] -> "(`a`, `b`)"
-     *
-     * @return {string} The SQL string
-     */
-
     let fieldNamesString;
 
     if (fields === "*") {
@@ -92,15 +88,14 @@ class Table {
     return fieldNamesString;
   }
 
+  /**
+   * Turns an object whos keys are fields into a string for after WHERE
+   * E.g.
+   * { a: "xyz", b: "abc" } -> ["(`a`=? OR `b`=?)", ["xyz", "abc"]]
+   *
+   * @return {*[string, *[]]} The operators joined with the values extracted into a seperate list
+   */
   basicOperatorJoin(config, operator) {
-    /**
-     * Turns an object whos keys are fields into a string for after WHERE
-     * E.g.
-     * { a: "xyz", b: "abc" } -> ["(`a`=? OR `b`=?)", ["xyz", "abc"]]
-     *
-     * @return {*[string, *[]]} The operators joined with the values extracted into a seperate list
-     */
-
     const keys = Object.keys(config);
 
     let whereString = keys.map((key) => `\`${key}\`=?`).join(` ${operator} `);
@@ -111,15 +106,14 @@ class Table {
     return [whereString, whereValues];
   }
 
+  /**
+   * Turns an object whos keys are fields and values are query values into a WHERE string
+   * E.g.
+   * { a: "xyz", b: "abc" } -> "WHERE (`a`=? OR `b`=?)", ["xyz", "abc"]
+   *
+   * @return {*[string, *[]]} The operators joined with the values extracted into a seperate list
+   */
   whereQueryToWhereString(query, operator = "OR") {
-    /**
-     * Turns an object whos keys are fields and values are query values into a WHERE string
-     * E.g.
-     * { a: "xyz", b: "abc" } -> "WHERE (`a`=? OR `b`=?)", ["xyz", "abc"]
-     *
-     * @return {*[string, *[]]} The operators joined with the values extracted into a seperate list
-     */
-
     if (!query) {
       return ["", []];
     }
@@ -132,16 +126,15 @@ class Table {
     return [` WHERE ${whereString}`, whereValues];
   }
 
+  /**
+   * Given an object that is a representation of the table, remove any fields below a given sensitivity level
+   *
+   * @param {Object} data The "row" in the table
+   * @param {number} sensitivity The minimum sensitivity to filter by
+   *
+   * @returns {Object} A filtered version of data
+   */
   filter(data, sensitivity) {
-    /**
-     * Given an object that is a representation of the table, remove any fields below a given sensitivity level
-     *
-     * @param {Object} data The "row" in the table
-     * @param {number} sensitivity The minimum sensitivity to filter by
-     *
-     * @returns {Object} A filtered version of data
-     */
-
     this.references.forEach((reference) => {
       // Filter any references present
       if (data[reference]) {
@@ -166,23 +159,22 @@ class Table {
 
   ///////////////////////////////////////// QUERY CONSTRUCTORS /////////////////////////////////////////
 
+  /**
+   * Get the construction strings for each column
+   *
+   * @returns {string[]} The construction strings for each column
+   */
   getFieldContructStrings() {
-    /**
-     * Get the construction strings for each column
-     *
-     * @returns {string[]} The construction strings for each column
-     */
     return Object.keys(this.fields).map((field) => this.fields[field].renderConstructionString());
   }
 
+  /**
+   * Build a CREATE TABLE string for the table
+   * Includes primary key, unique and reference constraints
+   *
+   * @returns {string} The create table string
+   */
   buildCreateTableString() {
-    /**
-     * Build a CREATE TABLE string for the table
-     * Includes primary key, unique and reference constraints
-     *
-     * @returns {string} The create table string
-     */
-
     const primaryKey = `PRIMARY KEY (\`${this.primaryKey}\`)`;
     const fieldConstructors = this.getFieldContructStrings();
     const unqiueFields = this.unqiueFields.map((field) => `UNIQUE (\`${field}\`)`);
@@ -197,27 +189,25 @@ class Table {
     return createTableString;
   }
 
+  /**
+   * Check all required construction columns are present in the given object
+   *
+   * @param {Object} config The configuration object of a new row
+   *
+   * @returns {boolean} True if all required construction columns are present
+   */
   hasRequiredConstructionFields(config) {
-    /**
-     * Check all required construction columns are present in the given object
-     *
-     * @param {Object} config The configuration object of a new row
-     *
-     * @returns {boolean} True if all required construction columns are present
-     */
-
     return this.requiredContructionFields.reduce((prev, curr) => prev && config.includes(curr), true);
   }
 
+  /**
+   * Build an SQL string to insert a new row into the table
+   *
+   * @param {Object} config The data for the new row
+   *
+   * @returns {*[string, *[]]} The SQL insert string and its values
+   */
   buildInsertQuery(config) {
-    /**
-     * Build an SQL string to insert a new row into the table
-     *
-     * @param {Object} config The data for the new row
-     *
-     * @returns {*[string, *[]]} The SQL insert string and its values
-     */
-
     const fields = Object.keys(config);
 
     const fieldNamesString = this.fieldsToSelectString(fields);
@@ -229,16 +219,15 @@ class Table {
     return [insertIntoString, values];
   }
 
+  /**
+   * Build an SQL string to select a rows from the table
+   *
+   * @param {Object || string} fields The fields to select from the table, can be *.
+   * @param {Object} conditional An object representing the WHERE part of the query
+   *
+   * @returns {*[string, *[]]} The SQL select string and its values
+   */
   buildSelectQuery(fields, conditional) {
-    /**
-     * Build an SQL string to select a rows from the table
-     *
-     * @param {Object || string} fields The fields to select from the table, can be *.
-     * @param {Object} conditional An object representing the WHERE part of the query
-     *
-     * @returns {*[string, *[]]} The SQL select string and its values
-     */
-
     let fieldNamesString = this.fieldsToSelectString(fields);
 
     let [whereString, whereValues] = this.whereQueryToWhereString(conditional);
@@ -247,18 +236,17 @@ class Table {
     return [selectString, whereValues];
   }
 
+  /**
+   * Build an SQL string to select a rows from the table within a given range
+   *
+   * @param {Object || string} fields The fields to select from the table, can be *
+   * @param {Object} conditional An object representing the WHERE part of the query
+   * @param {number} from The Nth row to start from
+   * @param {number} count The maximum ammount of rows to get from the table
+   *
+   * @returns {*[string, *[]]} The SQL limit select string and its values
+   */
   buildSelectLimitQuery(fields, conditional, from, count) {
-    /**
-     * Build an SQL string to select a rows from the table within a given range
-     *
-     * @param {Object || string} fields The fields to select from the table, can be *
-     * @param {Object} conditional An object representing the WHERE part of the query
-     * @param {number} from The Nth row to start from
-     * @param {number} count The maximum ammount of rows to get from the table
-     *
-     * @returns {*[string, *[]]} The SQL limit select string and its values
-     */
-
     let [selectString, selectValues] = this.buildSelectQuery(fields, conditional);
 
     let removeSemiColon = selectString.slice(0, selectString.length - 1);
@@ -266,53 +254,49 @@ class Table {
     return [`${removeSemiColon} LIMIT ?,?;`, [...selectValues, from, count]];
   }
 
+  /**
+   * Build an SQL string to select a rows from the table within a given range
+   *
+   * @param {Object} conditional An object representing the WHERE part of the query
+   *
+   * @returns {string} The SQL count string
+   */
   buildCountQuery(conditional) {
-    /**
-     * Build an SQL string to select a rows from the table within a given range
-     *
-     * @param {Object} conditional An object representing the WHERE part of the query
-     *
-     * @returns {string} The SQL count string
-     */
-
     let [whereString, whereValues] = this.whereQueryToWhereString(conditional);
     return [`SELECT COUNT(*) AS \`entry_count\` FROM \`${this.name}\`${whereString};`, whereValues];
   }
 
+  /**
+   * Build an SQL string to select every row in the table
+   *
+   * @returns {string} The select all SQL query string
+   */
   buildSelectAllQuery() {
-    /**
-     * Build an SQL string to select every row in the table
-     *
-     * @returns {string} The select all SQL query string
-     */
-
     return `SELECT * FROM \`${this.name}\`;`;
   }
 
+  /**
+   * Build an SQL string to delete a row from the table
+   *
+   * @param {Object} conditional An object representing the WHERE part of the query
+   *
+   * @returns {*[string, *[]]} The SQL delete string and its values
+   */
   buildDeleteQuery(conditional) {
-    /**
-     * Build an SQL string to delete a row from the table
-     *
-     * @param {Object} conditional An object representing the WHERE part of the query
-     *
-     * @returns {*[string, *[]]} The SQL delete string and its values
-     */
-
     let [whereString, whereValues] = this.whereQueryToWhereString(conditional);
 
     return [`DELETE FROM \`${this.name}\` ${whereString};`, whereValues];
   }
 
+  /**
+   * Build an SQL string to update a row in the table
+   *
+   * @param {Object} conditional An object representing the WHERE part of the query
+   * @param {Object} data An object representing the data to update in the row
+   *
+   * @returns {*[string, *[]]} The select string and its values
+   */
   buildUpdateString(conditional, data) {
-    /**
-     * Build an SQL string to update a row in the table
-     *
-     * @param {Object} conditional An object representing the WHERE part of the query
-     * @param {Object} data An object representing the data to update in the row
-     *
-     * @returns {*[string, *[]]} The select string and its values
-     */
-
     let dataString = Object.keys(data).map((key) => `\`${key}\`=?`);
     let [whereString, whereValues] = this.whereQueryToWhereString(conditional);
 
@@ -321,13 +305,12 @@ class Table {
 
   ///////////////////////////////////////// DB INTERFACE /////////////////////////////////////////
 
+  /**
+   * Resolve all foreign keys that are present in a a set of rows
+   *
+   * @param {Object[]} rows An array of rows to resolve
+   */
   async resolveReferences(rows = []) {
-    /**
-     * Resolve all foreign keys that are present in a a set of rows
-     *
-     * @param {Object[]} rows An array of rows to resolve
-     */
-
     for (let rowIndex = 0; rowIndex < rows.length; rowIndex++) {
       let row = rows[rowIndex];
 
@@ -355,15 +338,14 @@ class Table {
     return rows;
   }
 
+  /**
+   * Run an SQL query a return an error, is present, and the result
+   *
+   * @param {string} queryString The SQL query string
+   * @param {*[]} queryValues The values for the given query string
+   * @param {boolean} [returnFirst = false] If true, return the first result and discard other results
+   */
   async queryAndReturn(queryString, queryValues, returnFirst = false) {
-    /**
-     * Run an SQL query a return an error, is present, and the result
-     *
-     * @param {string} queryString The SQL query string
-     * @param {*[]} queryValues The values for the given query string
-     * @param {boolean} [returnFirst = false] If true, return the first result and discard other results
-     */
-
     let [err, result] = await this.db.query(queryString, queryValues);
     if (err) {
       return [err, null];
@@ -377,15 +359,14 @@ class Table {
     return [null, result];
   }
 
+  /**
+   * Count all occurrences in the table that fit the conitional
+   *
+   * @param {Object} conditional An object representing the WHERE part of the query
+   *
+   * @return {*[APIError, number]} An error, if errored, and the result
+   */
   async count(conditional) {
-    /**
-     * Count all occurrences in the table that fit the conitional
-     *
-     * @param {Object} conditional An object representing the WHERE part of the query
-     *
-     * @return {*[APIError, number]} An error, if errored, and the result
-     */
-
     const [queryString, queryValues] = this.buildCountQuery(conditional || {});
 
     const [err, result] = await this.db.query(queryString, queryValues);
@@ -396,101 +377,94 @@ class Table {
     return [null, result[0].entry_count];
   }
 
+  /**
+   * Get all rows in the table
+   *
+   * @return {*[APIError, Object[]]} An error, if errored, and the rows
+   */
   async all() {
-    /**
-     * Get all rows in the table
-     *
-     * @return {*[APIError, Object[]]} An error, if errored, and the rows
-     */
-
     const queryString = this.buildSelectAllQuery();
 
     return await this.queryAndReturn(queryString);
   }
 
+  /**
+   * Get the first row that meets the conditional
+   *
+   * @return {*[APIError, Object[]]} An error, if errored, and the first row
+   */
   async first(fields, conditional) {
-    /**
-     * Get the first row that meets the conditional
-     *
-     * @return {*[APIError, Object[]]} An error, if errored, and the first row
-     */
-
     const [queryString, queryValues] = this.buildSelectQuery(fields, conditional);
 
     return await this.queryAndReturn(queryString, queryValues, true);
   }
 
+  /**
+   * Get all rows in the table that are within the given range
+   *
+   * @param {string[]} fields The fields to select from the table
+   * @param {Object} conditional An object representing the WHERE part of the query
+   * @param {number} from The Nth row to start from
+   * @param {number} count The maximum ammount of rows to get from the table
+   *
+   * @return {*[APIError, Object[]]} An error, if errored, and the rows
+   */
   async limit(fields, conditional, from, count) {
-    /**
-     * Get all rows in the table that are within the given range
-     *
-     * @param {string[]} fields The fields to select from the table
-     * @param {Object} conditional An object representing the WHERE part of the query
-     * @param {number} from The Nth row to start from
-     * @param {number} count The maximum ammount of rows to get from the table
-     *
-     * @return {*[APIError, Object[]]} An error, if errored, and the rows
-     */
-
     const [queryString, queryValues] = this.buildSelectLimitQuery(fields, conditional, from, count);
 
     return await this.queryAndReturn(queryString, queryValues);
   }
 
+  /**
+   * Attempt to create a new row in the table with the given data
+   *
+   * @param {Object} data The data to create the row with where keys are column names
+   *
+   * @return {*[APIError, Object[]]} An error, if errored, and the rows
+   */
   async new(data) {
-    /**
-     * Attempt to create a new row in the table with the given data
-     *
-     * @param {Object} data The data to create the row with where keys are column names
-     *
-     * @return {*[APIError, Object[]]} An error, if errored, and the rows
-     */
-
     const [queryString, queryValues] = this.buildInsertQuery(data);
 
     return await this.queryAndReturn(queryString, queryValues);
   }
 
+  /**
+   * Attempt to delete the rows from the table that meet the conditional
+   *
+   * @param {Object} conditional An object representing the WHERE part of the query
+   *
+   * @return {*[APIError, Object[]]} An error, if errored, and the rows
+   */
   async delete(conditional) {
-    /**
-     * Attempt to delete the rows from the table that meet the conditional
-     *
-     * @param {Object} conditional An object representing the WHERE part of the query
-     *
-     * @return {*[APIError, Object[]]} An error, if errored, and the rows
-     */
-
     const [queryString, queryValues] = this.buildDeleteQuery(conditional);
 
     return await this.queryAndReturn(queryString, queryValues);
   }
 
+  /**
+   * Attempt to update a row from the table that meets the conditional
+   *
+   * @param {Object} conditional An object representing the WHERE part of the query
+   * @param {Object} data An object representing the data to update in the row
+   *
+   * @return {*[APIError, Object[]]} An error, if errored, and the rows
+   */
   async edit(conditional, data) {
-    /**
-     * Attempt to update a row from the table that meets the conditional
-     *
-     * @param {Object} conditional An object representing the WHERE part of the query
-     * @param {Object} data An object representing the data to update in the row
-     *
-     * @return {*[APIError, Object[]]} An error, if errored, and the rows
-     */
-
     const [queryString, queryValues] = this.buildUpdateString(conditional, data);
 
     return await this.queryAndReturn(queryString, queryValues);
   }
 
+  /**
+   * Manually run an SQL query string
+   * Not reccomended to be used
+   *
+   * @param {Object} queryString The SQL query string to execute
+   * @param {Object} queryValues An array of values that are used in the query string
+   *
+   * @return {*[APIError, Object[]]} An error, if errored, and the rows
+   */
   async manual(queryString, queryValues) {
-    /**
-     * Manually run an SQL query string
-     * Not reccomended to be used
-     *
-     * @param {Object} queryString The SQL query string to execute
-     * @param {Object} queryValues An array of values that are used in the query string
-     *
-     * @return {*[APIError, Object[]]} An error, if errored, and the rows
-     */
-
     return await this.queryAndReturn(queryString, queryValues);
   }
 }

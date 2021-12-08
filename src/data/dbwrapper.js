@@ -3,13 +3,12 @@ import mysql from "mysql";
 import { promisify } from "util";
 import { DatabaseError, GenericError } from "../errors/apierrors.js";
 
+/**
+ * A wrapper for database connection and query
+ *
+ * @param {Object} config Override configs for database connection
+ */
 class DBWrapper {
-  /**
-   * A wrapper for database connection and query
-   *
-   * @param {Object} config Override configs for database connection
-   */
-
   constructor(config) {
     let dbConfig = {
       connectionLimit: process.env.DB_POOL_LIMIT,
@@ -25,16 +24,15 @@ class DBWrapper {
     this.tables = {};
   }
 
+  /**
+   * Perform a database query while catching errors and escaping SQL
+   *
+   * @param {string} query The SQL string to execute
+   * @param {Object[]} data The data to splice into the SQL query by replacing ?
+   *
+   * @returns {Object[]} [An error if one occoured, The result of the query]
+   */
   async query(query, data = []) {
-    /**
-     * Perform a database query while catching errors and escaping SQL
-     *
-     * @param {string} query The SQL string to execute
-     * @param {Object[]} data The data to splice into the SQL query by replacing ?
-     *
-     * @returns {Object[]} [An error if one occoured, The result of the query]
-     */
-
     try {
       const res = await this.pool.query(query, data);
 
@@ -66,16 +64,15 @@ class DBWrapper {
     }
   }
 
+  /**
+   * Initialise a table from database
+   * Create it if it doesnt exist already
+   *
+   * @param {Table} table The table model to be registered
+   *
+   * @returns {boolean} Wether the database successfully handled the request
+   */
   async registerTable(table) {
-    /**
-     * Initialise a table from database
-     * Create it if it doesnt exist already
-     * 
-     * @param {Table} table The table model to be registered
-     * 
-     * @returns {boolean} Wether the database successfully handled the request
-     */
-
     // Construct the table
     const newTable = table(this);
     this.tables[newTable.name] = newTable;
@@ -90,12 +87,12 @@ class DBWrapper {
     return true;
   }
 
+  /**
+   * @param {string} tableName The name of a table to be returned
+   *
+   * @returns {Table} The table requests, can be undefined
+   */
   table(tableName) {
-    /**
-     * @param {string} tableName The name of a table to be returned
-     * 
-     * @returns {Table} The table requests, can be undefined
-     */
     return this.tables[tableName];
   }
 }

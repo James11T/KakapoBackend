@@ -1,13 +1,19 @@
 class BaseField {
   /**
    * Used to represent a column in a table
-   * 
+   *
    * @param {string} name The name of the column in the database
    * @param {Object} props The properties of the column in the database
    */
-
   constructor(name, props) {
-    const { nullable = false, primaryKey = false, unique = false, defaultValue = undefined, sensitivity = 255, reference } = props;
+    const {
+      nullable = false,
+      primaryKey = false,
+      unique = false,
+      defaultValue = undefined,
+      sensitivity = 255,
+      reference,
+    } = props;
 
     this.name = name;
     this.nullable = nullable;
@@ -20,19 +26,18 @@ class BaseField {
     this.hasDefaultValue = defaultValue !== undefined;
   }
 
+  /**
+   * Render the default value of a column
+   *
+   * E.g.
+   * VARCHAR(32)
+   * INT
+   * BOOL
+   * NULL
+   *
+   * @return {string} The default value
+   */
   renderDefault() {
-    /**
-     * Render the default value of a column
-     * 
-     * E.g.
-     * VARCHAR(32)
-     * INT
-     * BOOL
-     * NULL
-     * 
-     * @return {string} The default value
-     */
-
     if (this.defaultValue === null) {
       return "NULL";
     }
@@ -40,16 +45,15 @@ class BaseField {
     return this.renderData(this.defaultValue);
   }
 
+  /**
+   * Render the section of an SQL query that creates the column in a table
+   * E.g.
+   * `ID` INT NOT NULL DEFAULT 1
+   * `name` VARCHAR(32) NOT NULL DEFAULT "Egg";
+   *
+   * @returns {string} The SQL section
+   */
   renderConstructionString() {
-    /**
-     * Render the section of an SQL query that creates the column in a table
-     * E.g.
-     * `ID` INT NOT NULL DEFAULT 1
-     * `name` VARCHAR(32) NOT NULL DEFAULT "Egg";
-     * 
-     * @returns {string} The SQL section
-     */
-
     const typeContructor = this.renderTypeContructor();
     const nullString = this.nullable ? " NULL" : " NOT NULL";
     const defaultString = this.defaultValue !== undefined ? ` DEFAULT ${this.renderDefault()}` : "";
@@ -57,12 +61,12 @@ class BaseField {
     return `\`${this.name}\` ${typeContructor}${nullString}${defaultString}`;
   }
 
+  /**
+   * Return wether the column must be defined upon construction
+   *
+   * @return {boolean} True if the column must be defined upon construction
+   */
   isRequiredToCreate() {
-    /**
-     * Return wether the column must be defined upon construction
-     * 
-     * @return {boolean} True if the column must be defined upon construction
-     */
     return !(this.nullable || this.hasDefaultValue);
   }
 }
@@ -71,7 +75,6 @@ class NumberField extends BaseField {
   /**
    * Represents an INT column
    */
-
   constructor(name, props) {
     const { autoIncrement = false, ...otherProps } = props;
     super(name, otherProps);
@@ -102,7 +105,6 @@ class StringField extends BaseField {
   /**
    * Represents a VARCHAR column
    */
-
   constructor(name, props) {
     const { maxLength = 256, charSet = "utf8mb4 COLLATE utf8mb4_bin", ...otherProps } = props;
     super(name, otherProps);
@@ -130,7 +132,6 @@ class BooleanField extends BaseField {
   /**
    * Represents a BOOL or TINYINT column
    */
-
   constructor(name, props) {
     const { ...otherProps } = props;
     super(name, otherProps);

@@ -1,11 +1,10 @@
 import { decodeAuthHeader } from "../auth/tokens.js";
 import { sendError, NotAuthenticatedError, RankTooLowError } from "../errors/apierrors.js";
 
+/**
+ * Middleware to fetch the user from the database and append it to the request object
+ */
 const authenticateRequest = async (req, res, next) => {
-  /**
-   * Middleware to fetch the user from the database and append it to the request object
-   */
-
   if (!req.headers.authorization) {
     return next();
   }
@@ -23,6 +22,9 @@ const authenticateRequest = async (req, res, next) => {
   return next();
 };
 
+/**
+ * Middleware to check if the user is authenticated
+ */
 const isAuthenticated = (req, res, next) => {
   if (!req.user) {
     return sendError(res, new NotAuthenticatedError());
@@ -31,16 +33,15 @@ const isAuthenticated = (req, res, next) => {
   return next();
 };
 
+/**
+ * Returns a middleware function that checks if the user is authenticated
+ * If so it checks if they are a high enough rank to access the endpoint
+ *
+ * @param {number} minimumRank The minimum rank required to use the endpoint
+ *
+ * @returns {Function} The function to be used as middleware
+ */
 const isRank = (minimumRank) => {
-  /**
-   * Returns a middleware function that checks if the user is authenticated
-   * If so it checks if they are a high enough rank to access the endpoint
-   *
-   * @param {number} minimumRank The minimum rank required to use the endpoint
-   *
-   * @returns {Function} The function to be used as middleware
-   */
-
   return async (req, res, next) => {
     if (!req.user) {
       return sendError(res, new NotAuthenticatedError());

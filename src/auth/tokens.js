@@ -3,14 +3,13 @@ import { getEpoch } from "../utils.js";
 
 import { BadTokenError, NotAuthenticatedError } from "../errors/apierrors.js";
 
+/**
+ * Generate a token for a user
+ * @param {string} public_id The public_id of the user of who the token identifies
+ *
+ * @returns {Object[]} [An error if one occoured, The generated token]
+ */
 const signToken = (public_id) => {
-  /**
-   * Generate a token for a user
-   * @param {string} public_id The public_id of the user of who the token identifies
-   *
-   * @returns {Object[]} [An error if one occoured, The generated token]
-   */
-
   const epoch = getEpoch();
 
   try {
@@ -24,14 +23,13 @@ const signToken = (public_id) => {
   }
 };
 
+/**
+ * Decode a JWT token into its original form
+ * @param {string} token The JWT token to decode
+ *
+ * @returns {Object[]} [An error if one occoured, The decoded data]
+ */
 const decodeToken = (token) => {
-  /**
-   * Decode a JWT token into its original form
-   * @param {string} token The JWT token to decode
-   *
-   * @returns {Object[]} [An error if one occoured, The decoded data]
-   */
-
   try {
     const decodedToken = jwt.verify(token, process.env.TOKEN_SECRET);
     return [null, decodedToken];
@@ -40,14 +38,13 @@ const decodeToken = (token) => {
   }
 };
 
+/**
+ * Get the user that the token represents
+ * @param {string} token The decoded JWT token data
+ *
+ * @returns {Object[]} [An error if one occoured, The user who the token belongs to]
+ */
 const tokenToUser = async (token) => {
-  /**
-   * Get the user that the token represents
-   * @param {string} token The decoded JWT token data
-   *
-   * @returns {Object[]} [An error if one occoured, The user who the token belongs to]
-   */
-
   const [queryError, tokenUser] = await global.db.table("user").first("*", { public_id: token.public_id });
   if (queryError) {
     return [queryError, null];
@@ -56,14 +53,13 @@ const tokenToUser = async (token) => {
   return [null, tokenUser];
 };
 
+/**
+ * Extract the JWT token from the auth header, decode it and then return the user is belongs to
+ * @param {string} authHeader The authorization header provided
+ *
+ * @returns {Object} [An error if one occoured, The user who is authenticating]
+ */
 const decodeAuthHeader = async (authHeader) => {
-  /**
-   * Extract the JWT token from the auth header, decode it and then return the user is belongs to
-   * @param {string} authHeader The authorization header provided
-   *
-   * @returns {Object} [An error if one occoured, The user who is authenticating]
-   */
-
   // Split the authorization header into the auth type and the token
   const [_, token] = authHeader.split(" ");
   if (!token) {

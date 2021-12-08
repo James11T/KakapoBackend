@@ -6,14 +6,13 @@ import DBWrapper from "./data/dbwrapper.js";
 import models from "./models/tables/index.js";
 import fileUpload from "express-fileupload";
 
+/**
+ * Used to start the backend server
+ *
+ * @param {string} apiBase The base URL of the API
+ * @param {number} [port=process.env.API_PORT] The port of the backend server
+ */
 const startApp = async (apiBase, port = process.env.API_PORT) => {
-  /**
-   * Used to start the backend server
-   * 
-   * @param {string} apiBase The base URL of the API
-   * @param {number} [port=process.env.API_PORT] The port of the backend server
-   */
-
   console.log("Initialising API");
   const app = express();
   const db = new DBWrapper();
