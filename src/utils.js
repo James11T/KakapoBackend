@@ -34,6 +34,18 @@ const checkEmail = (email) => {
   return re.test(email.toLowerCase());
 };
 
+const checkKakapoId = (kakapoId) => {
+  return kakapoId.length === clamp(kakapoId.length, 2, 32) && !kakapoId.includes(" ");
+};
+
+const checkDisplayName = (displayName) => {
+  return displayName.length === clamp(kakapoId.length, 2, 32);
+};
+
+const checkPassword = (password) => {
+  return password.length === clamp(password.length, 8, 256);
+};
+
 const getUUID = () => {
   return randomUUID();
 };
@@ -58,4 +70,14 @@ const generatePublicId = (length = 16) => {
   return ns;
 };
 
-export { getEpoch, clamp, checkRequiredParameters, checkEmail, getUUID, generatePublicId };
+export {
+  getEpoch,
+  clamp,
+  checkRequiredParameters,
+  checkEmail,
+  getUUID,
+  generatePublicId,
+  checkKakapoId,
+  checkDisplayName,
+  checkPassword
+};
