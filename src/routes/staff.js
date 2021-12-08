@@ -8,7 +8,7 @@ const getStaffRoutes = () => {
 
   router.use("/user", getStaffUserRoutes());
   router.use("/post", getStaffPostRoutes());
-  
+
   return router;
 };
 

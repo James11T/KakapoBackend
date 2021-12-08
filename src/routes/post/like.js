@@ -1,13 +1,6 @@
 import express from "express";
-import {
-  GenericError,
-  sendError,
-  MissingParametersError,
-  PostNotFoundError,
-  AlreadyLikedError,
-  NotLikedError,
-} from "../../errors/apierrors.js";
-import { checkRequiredParameters, getEpoch } from "../../utils.js";
+import { GenericError, sendError, AlreadyLikedError, NotLikedError } from "../../errors/apierrors.js";
+import { getEpoch } from "../../utils.js";
 import { isAuthenticated } from "../../middleware/auth.middleware.js";
 import { resolvePostMiddleware } from "../../middleware/data.middleware.js";
 
@@ -21,7 +14,9 @@ const getLikeCount = async (req, res) => {
 };
 
 const likePost = async (req, res) => {
-  const [getLikerError, likerResult] = await global.db.table("like").first("*", { post: req.post.id, liker: req.authenticatedUser.id });
+  const [getLikerError, likerResult] = await global.db
+    .table("like")
+    .first("*", { post: req.post.id, liker: req.authenticatedUser.id });
   if (getLikerError) {
     return sendError(res, new GenericError());
   }
@@ -41,7 +36,9 @@ const likePost = async (req, res) => {
 };
 
 const unlikePost = async (req, res) => {
-  const [getLikerError, likerResult] = await global.db.table("like").first("*", { post: req.post.id, liker: req.authenticatedUser.id });
+  const [getLikerError, likerResult] = await global.db
+    .table("like")
+    .first("*", { post: req.post.id, liker: req.authenticatedUser.id });
   if (getLikerError) {
     return sendError(res, new GenericError());
   }

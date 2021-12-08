@@ -1,14 +1,8 @@
 import express from "express";
-import {
-  sendError,
-  AlreadyFriendsError,
-  GenericError,
-  MissingParametersError,
-  NoFriendRequestError,
-  UserNotFoundError,
-} from "../../errors/apierrors.js";
+import { sendError, AlreadyFriendsError, GenericError, NoFriendRequestError } from "../../errors/apierrors.js";
 import { isAuthenticated } from "../../middleware/auth.middleware.js";
-import { checkRequiredParameters, getEpoch } from "../../utils.js";
+import { resolveUserMiddleware } from "../../middleware/data.middleware.js";
+import { getEpoch } from "../../utils.js";
 
 const getFriendCount = async (req, res) => {
   const [countError, friendCount] = await global.db.table("friend_request").count();
@@ -20,24 +14,9 @@ const getFriendCount = async (req, res) => {
 };
 
 const sendFriendRequest = async (req, res) => {
-  const [hasRequiredParameters, missingParameters] = checkRequiredParameters(req.body, ["kakapo_id"]);
-  if (!hasRequiredParameters) {
-    return sendError(res, new MissingParametersError({ missingParameters: missingParameters }));
-  }
-
-  const { kakapo_id } = req.body;
-  const [getUserError, user] = await global.db.table("user").first(["kakapo_id"], { kakapo_id: kakapo_id });
-  if (getUserError) {
-    return sendError(res, new GenericError());
-  }
-
-  if (!user) {
-    return sendError(res, new UserNotFoundError());
-  }
-
   let newFR = {
     from: req.authenticatedUser.id,
-    to: user.id,
+    to: req.user.id,
     sent_at: getEpoch(),
   };
 
@@ -51,25 +30,8 @@ const sendFriendRequest = async (req, res) => {
 };
 
 const acceptFriendRequest = async (req, res) => {
-  const [hasRequiredParameters, missingParameters] = checkRequiredParameters(req.body, ["kakapo_id"]);
-  if (!hasRequiredParameters) {
-    return sendError(res, new MissingParametersError({ missingParameters: missingParameters }));
-  }
-
-  // Get the user who the friend request is from
-  const { kakapo_id } = req.body;
-
-  const [getUserError, fromUser] = await global.db.table("user").first(["kakapo_id"], { kakapo_id: kakapo_id });
-  if (getUserError) {
-    return sendError(res, new GenericError());
-  }
-
-  if (!fromUser) {
-    return sendError(res, new UserNotFoundError());
-  }
-
   // Check friend request was sent
-  let friendRequestQuery = { from: fromUser.id, to: req.authenticatedUser.id };
+  let friendRequestQuery = { from: req.user.id, to: req.authenticatedUser.id };
 
   const [getRequestError, friendRequest] = await global.db.table("friend_request").first(["*"], friendRequestQuery);
 
@@ -83,10 +45,10 @@ const acceptFriendRequest = async (req, res) => {
 
   // Check not already friends
   let friendshipQuery;
-  if (req.authenticatedUser.id < fromUser.id) {
-    friendshipQuery = { user1: req.authenticatedUser.id, user2: fromUser.id };
+  if (req.authenticatedUser.id < req.user.id) {
+    friendshipQuery = { user1: req.authenticatedUser.id, user2: req.user.id };
   } else {
-    friendshipQuery = { user1: fromUser.id, user2: req.authenticatedUser.id };
+    friendshipQuery = { user1: req.user.id, user2: req.authenticatedUser.id };
   }
 
   const [getFriendshipError, existingFiendRequest] = await global.db.table("friendship").first(["*"], friendshipQuery);
@@ -119,8 +81,8 @@ const getUserFriendRoutes = () => {
   const router = express.Router();
 
   router.get("/count", getFriendCount);
-  router.post("/send", isAuthenticated, sendFriendRequest);
-  router.post("/accept", isAuthenticated, acceptFriendRequest);
+  router.post("/send", isAuthenticated, resolveUserMiddleware, sendFriendRequest);
+  router.post("/accept", isAuthenticated, resolveUserMiddleware, acceptFriendRequest);
 
   return router;
 };

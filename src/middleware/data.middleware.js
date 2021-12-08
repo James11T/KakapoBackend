@@ -5,7 +5,7 @@ import {
   GenericError,
   PostNotFoundError,
   CommentNotFoundError,
-  UserNotFoundError
+  UserNotFoundError,
 } from "../errors/apierrors.js";
 
 /**
@@ -46,4 +46,4 @@ const resolvePostMiddleware = resolvePublicID("post", "post_id", PostNotFoundErr
 const resolveCommentMiddleware = resolvePublicID("comment", "comment_id", CommentNotFoundError);
 const resolveUserMiddleware = resolvePublicID("user", "kakapo_id", UserNotFoundError);
 
-export { resolvePostMiddleware, resolveCommentMiddleware, resolvePublicID };
+export { resolvePostMiddleware, resolveCommentMiddleware, resolveUserMiddleware, resolvePublicID };
