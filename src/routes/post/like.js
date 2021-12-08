@@ -8,8 +8,8 @@ import {
   NotLikedError,
 } from "../../errors/apierrors.js";
 import { checkRequiredParameters, getEpoch } from "../../utils.js";
-import { isAuthenticated } from "../../middleware/auth.js";
-import { resolvePostMiddleware } from "../../middleware/data.js";
+import { isAuthenticated } from "../../middleware/auth.middleware.js";
+import { resolvePostMiddleware } from "../../middleware/data.middleware.js";
 
 const getLikeCount = async (req, res) => {
   const [countError, count] = await global.db.table("like").count({ post: req.post.id });
@@ -63,7 +63,7 @@ const unlikePost = async (req, res) => {
 const getPostLikeRoutes = () => {
   const router = express.Router();
 
-  router.get("/", resolvePostMiddleware, getLikeCount);
+  router.get("/count", resolvePostMiddleware, getLikeCount);
   router.post("/", isAuthenticated, resolvePostMiddleware, likePost);
   router.delete("/", isAuthenticated, resolvePostMiddleware, unlikePost);
 

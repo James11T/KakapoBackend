@@ -10,8 +10,8 @@ import {
 import { getPostCommentRoutes } from "./post/comment.js";
 import { getPostLikeRoutes } from "./post/like.js";
 import { checkRequiredParameters, generatePublicId, getEpoch } from "../utils.js";
-import { isAuthenticated } from "../middleware/auth.js";
-import { resolvePostMiddleware } from "../middleware/data.js";
+import { isAuthenticated } from "../middleware/auth.middleware.js";
+import { resolvePostMiddleware } from "../middleware/data.middleware.js";
 
 const getPost = async (req, res) => {
   return res.send({ post: global.db.table("post").filter(req.post, 0) });

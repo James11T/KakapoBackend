@@ -7,8 +7,8 @@ import {
   NotCommentOwnerError,
 } from "../../errors/apierrors.js";
 import { checkRequiredParameters, getEpoch, generatePublicId } from "../../utils.js";
-import { isAuthenticated } from "../../middleware/auth.js";
-import { resolvePostMiddleware, resolveCommentMiddleware } from "../../middleware/data.js";
+import { isAuthenticated } from "../../middleware/auth.middleware.js";
+import { resolvePostMiddleware, resolveCommentMiddleware } from "../../middleware/data.middleware.js";
 
 const getComment = async (req, res) => {
   const [hasRequiredParameters, missingParameters] = checkRequiredParameters(req.body, ["comment_id"]);

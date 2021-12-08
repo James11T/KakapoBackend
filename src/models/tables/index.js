@@ -1,9 +1,9 @@
-import userModel from "./user.js";
-import postModel from "./post.js";
-import friendRequestModel from "./friendrequest.js";
-import postTag from "./posttag.js";
-import friendshipModel from "./friendship.js";
-import likeModel from "./like.js";
-import commentModel from "./comment.js";
+import userModel from "./user.model.js";
+import postModel from "./post.model.js";
+import friendRequestModel from "./friendrequest.model.js";
+import postTag from "./posttag.model.js";
+import friendshipModel from "./friendship.model.js";
+import likeModel from "./like.model.js";
+import commentModel from "./comment.model.js";
 
 export default [userModel, postModel, friendRequestModel, postTag, friendshipModel, likeModel, commentModel];

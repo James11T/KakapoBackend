@@ -1,7 +1,7 @@
 import express from "express";
 
 import { getRoutes } from "./routes/index.js";
-import { authenticateRequest } from "./middleware/auth.js";
+import { authenticateRequest } from "./middleware/auth.middleware.js";
 import DBWrapper from "./data/dbwrapper.js";
 import models from "./models/tables/index.js";
 import fileUpload from "express-fileupload";

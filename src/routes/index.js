@@ -4,7 +4,7 @@ import { getUserRoutes } from "./user.js";
 import { getStaffRoutes } from "./staff.js";
 import { getPostRoutes } from "./post.js";
 
-import { isRank } from "../middleware/auth.js";
+import { isRank } from "../middleware/auth.middleware.js";
 
 const getRoutes = () => {
   const router = express.Router();

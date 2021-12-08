@@ -2,7 +2,7 @@ import express from "express";
 
 import { getUserAtSensitivity } from "../shared.js";
 import { checkRequiredParameters, clamp } from "../../utils.js";
-import { isRank } from "../../middleware/auth.js";
+import { isRank } from "../../middleware/auth.middleware.js";
 import { BadParametersError, GenericError, MissingParametersError, UserNotFoundError } from "../../errors/apierrors.js";
 
 const getFullUserData = async (req, res) => {

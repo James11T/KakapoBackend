@@ -6,7 +6,7 @@ import {
   NoFriendRequestError,
   UserNotFoundError,
 } from "../../errors/apierrors.js";
-import { isAuthenticated } from "../../middleware/auth.js";
+import { isAuthenticated } from "../../middleware/auth.middleware.js";
 import { checkRequiredParameters } from "../../utils.js";
 
 const getFriendCount = async (req, res) => {
