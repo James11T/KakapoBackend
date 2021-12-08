@@ -2,6 +2,10 @@ import { decodeAuthHeader } from "../auth/tokens.js";
 import { sendError, NotAuthenticatedError, RankTooLowError } from "../errors/apierrors.js";
 
 const authenticateRequest = async (req, res, next) => {
+  /**
+   * Middleware to fetch the user from the database and append it to the request object
+   */
+
   if (!req.headers.authorization) {
     return next();
   }

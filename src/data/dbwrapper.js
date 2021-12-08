@@ -67,6 +67,16 @@ class DBWrapper {
   }
 
   async registerTable(table) {
+    /**
+     * Initialise a table from database
+     * Create it if it doesnt exist already
+     * 
+     * @param {Table} table The table model to be registered
+     * 
+     * @returns {boolean} Wether the database successfully handled the request
+     */
+
+    // Construct the table
     const newTable = table(this);
     this.tables[newTable.name] = newTable;
 
@@ -81,6 +91,11 @@ class DBWrapper {
   }
 
   table(tableName) {
+    /**
+     * @param {string} tableName The name of a table to be returned
+     * 
+     * @returns {Table} The table requests, can be undefined
+     */
     return this.tables[tableName];
   }
 }

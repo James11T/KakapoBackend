@@ -176,6 +176,14 @@ class IsAuthenticatedError extends APIError {
 }
 
 const sendError = (res, error) => {
+  /**
+   * Dispatch an error to the client 
+   * 
+   * @param {Object} res The response component in an express request
+   * @param {APIError} error The error to ditpatch
+   * 
+   * @return {Object} The response data
+   */
   return res.send({ error: error.code, message: error.message, ...error.errorData });
 };
 
