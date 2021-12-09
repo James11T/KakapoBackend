@@ -5,7 +5,11 @@ import { clamp } from "../../utils/funcs.js";
 import { isRank } from "../../middleware/auth.middleware.js";
 import { BadParametersError, GenericError } from "../../errors/apierrors.js";
 import { resolveUserMiddleware } from "../../middleware/data.middleware.js";
+import { checkDisplayName } from "../../utils/validations.js";
 
+/**
+ * Get a user from the database with added info like post, comment and friend count
+ */
 const getFullUserData = async (req, res) => {
   const [postCountErr, postCount] = await global.db.table("post").count({ author: req.user.id });
   const [friendCountErr, friendCount] = await global.db
@@ -30,26 +34,6 @@ const getFullUserData = async (req, res) => {
 const getUsers = async (req, res) => {
   /**
    * Get 'count' user entries after the 'from'th entry
-   *
-   * URL Parameters:
-   *   from: number
-   *   count: number
-   *
-   * Defaults:
-   *   'from': 0
-   *   'count': 20
-   *
-   * Returns:
-   *   {
-   *     "users": [
-   *       <USERS>
-   *     ]
-   *   }
-   *
-   * Example URLs:
-   *   /user/getusers?from=0?count=5
-   *   /user/getusers?count=3
-   *   /user/getusers?from=7
    */
 
   let { from = 0, count = 20 } = req.body;
@@ -82,16 +66,6 @@ const getUsers = async (req, res) => {
 const getAllUsers = async (req, res) => {
   /**
    * Get all user entries
-   *
-   * Returns:
-   *   {
-   *     "users": [
-   *       <USERS>
-   *     ]
-   *   }
-   *
-   * Example URLs:
-   *   /user/getallusers
    */
 
   const [queryError, queryResults] = await global.db.table("user").all();
@@ -104,6 +78,22 @@ const getAllUsers = async (req, res) => {
   });
 };
 
+// Rules that define the manual setting of a users data
+const dataRules = {
+  display_name: {
+    rank: 50,
+    type: "string",
+    check: checkDisplayName,
+  },
+  kakapo_id: {
+    rank: 70,
+    type: "string",
+    check: (kakapoId) => !kakapoIdTaken(kakapoId),
+  },
+};
+
+const setUserDataRaw = async (req, res) => {};
+
 const getStaffUserRoutes = () => {
   const router = express.Router();
 
@@ -111,6 +101,8 @@ const getStaffUserRoutes = () => {
   router.get("/details", resolveUserMiddleware, getFullUserData);
   router.get("/range", getUsers);
   router.get("/all", isRank(process.env.ELEVATED_DEVELOPER), getAllUsers);
+
+  router.get("/set", setUserDataRaw);
 
   return router;
 };
