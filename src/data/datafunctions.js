@@ -20,6 +20,7 @@ const createNewUser = async (data) => {
   }
 
   let { kakapo_id, email, password, display_name } = data;
+  display_name = display_name.trim();
 
   if (!checkEmail(email)) {
     return [new BadParametersError({ badParameters: ["email"] }), null];

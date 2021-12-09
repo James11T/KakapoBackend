@@ -32,7 +32,8 @@ const checkKakapoId = (kakapoId) => {
  * @return {boolean} True if the display name is valid
  */
 const checkDisplayName = (displayName) => {
-  return displayName.length === clamp(kakapoId.length, 2, 32);
+  const trimmerName = displayName.trim();
+  return trimmerName.length === clamp(trimmerName.length, 2, 32);
 };
 
 /**
