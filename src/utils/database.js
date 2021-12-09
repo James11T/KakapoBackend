@@ -55,4 +55,20 @@ const deletePost = async (post, deleteFile = true) => {
   return [null, deletePostResult];
 };
 
-export { orderedFriendQuery, usersAreFriends, deletePost };
+/**
+ * Check if a Kakapo ID is in use
+ *
+ * @param {string} kakapoId
+ *
+ * @returns {boolean} True if the Kakapo ID is in use
+ */
+const isKakapoIDInUse = async (kakapoId) => {
+  const [getUserError, user] = await global.db.table("user").first(["kakapo_id"], { kakapo_id: kakapoId });
+  if (getUserError) {
+    return [new GenericError(), null];
+  }
+
+  return [null, !!user];
+};
+
+export { orderedFriendQuery, usersAreFriends, deletePost, isKakapoIDInUse };

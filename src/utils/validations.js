@@ -32,8 +32,7 @@ const checkKakapoId = (kakapoId) => {
  * @return {boolean} True if the display name is valid
  */
 const checkDisplayName = (displayName) => {
-  const trimmerName = displayName.trim();
-  return trimmerName.length === clamp(trimmerName.length, 2, 32);
+  return displayName.length === clamp(displayName.length, 2, 32);
 };
 
 /**
@@ -45,6 +44,18 @@ const checkDisplayName = (displayName) => {
  */
 const checkPassword = (password) => {
   return password.length === clamp(password.length, 8, 256);
+};
+
+/**
+ * Check an about input for validity
+ *
+ * @param {string} about The data
+ *
+ * @returns {boolean} True if the about is valid
+ */
+const checkAbout = (about) => {
+  const trimmedAbout = about.trim();
+  return trimmedAbout.length === clamp(trimmedAbout.length, 0, 1024);
 };
 
 /**
@@ -61,4 +72,4 @@ const checkRequiredParameters = (obj, requiredParameters) => {
   return [missingParameters.length === 0, missingParameters];
 };
 
-export { checkEmail, checkKakapoId, checkDisplayName, checkPassword, checkRequiredParameters };
+export { checkEmail, checkKakapoId, checkDisplayName, checkPassword, checkRequiredParameters, checkAbout };
