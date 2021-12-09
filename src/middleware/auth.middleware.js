@@ -55,4 +55,20 @@ const isRank = (minimumRank) => {
   };
 };
 
-export { isRank, authenticateRequest, isAuthenticated };
+const rankExceeds = (req, res, next) => {
+  if (req.authenticatedUser.rank <= req.user.rank) {
+    return sendError(res, new RankTooLowError());
+  }
+
+  return next();
+};
+
+const rankExceedsOrEqual = (req, res, next) => {
+  if (req.authenticatedUser.rank < req.user.rank) {
+    return sendError(res, new RankTooLowError());
+  }
+
+  return next();
+};
+
+export { isRank, authenticateRequest, isAuthenticated, rankExceeds, rankExceedsOrEqual };
