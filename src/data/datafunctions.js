@@ -1,4 +1,9 @@
-import { MissingParametersError, BadParametersError, GenericError } from "../errors/apierrors.js";
+import {
+  MissingParametersError,
+  BadParametersError,
+  GenericError,
+  KakapoIDReservedError,
+} from "../errors/apierrors.js";
 import { getEpoch, getUUID } from "../utils/funcs.js";
 import { checkRequiredParameters, checkEmail, checkKakapoId, checkPassword } from "../utils/validations.js";
 import { hashPassword, toPasswordHashString } from "../auth/passwords.js";
@@ -21,6 +26,7 @@ const createNewUser = async (data) => {
 
   let { kakapo_id, email, password, display_name } = data;
   display_name = display_name.trim();
+  kakapo_id = kakapo_id.trim();
 
   if (!checkEmail(email)) {
     return [new BadParametersError({ badParameters: ["email"] }), null];
@@ -42,14 +48,12 @@ const createNewUser = async (data) => {
     return [new BadParametersError({ badParameters: ["password"] }), null];
   }
 
-  const [getUserError, checkId] = await global.db.table("user").first(["kakapo_id"], { kakapo_id: kakapo_id });
-  if (getUserError) {
-    return [new GenericError(), null];
+  const [checkIDError, isInUse] = await isKakapoIDInUse(kakapo_id);
+  if (checkIDError) {
+    return sendError(res, new GenericError());
   }
-
-  if (checkId) {
-    // KakapoID is taken
-    return [new BadParametersError({ badParameters: ["kakapo_id"], message: "kakapo_id is unavailable" }), null];
+  if (isInUse) {
+    return sendError(res, new KakapoIDReservedError());
   }
 
   const { salt, hash } = await hashPassword(password);
