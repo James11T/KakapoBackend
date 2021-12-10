@@ -2,10 +2,18 @@ import express from "express";
 
 import { getUserAtSensitivity } from "../shared.js";
 import { clamp } from "../../utils/funcs.js";
-import { isRank } from "../../middleware/auth.middleware.js";
-import { BadParametersError, GenericError } from "../../errors/apierrors.js";
+import { checkDisplayName, checkKakapoId } from "../../utils/validations.js";
+import { isRank, rankExceeds } from "../../middleware/auth.middleware.js";
+import { requireData } from "../../middleware/request.middleware.js";
 import { resolveUserMiddleware } from "../../middleware/data.middleware.js";
-import { checkDisplayName } from "../../utils/validations.js";
+import {
+  BadParametersError,
+  GenericError,
+  KakapoIDReservedError,
+  RankTooLowError,
+  sendError,
+} from "../../errors/apierrors.js";
+import { isKakapoIDInUse } from "../../utils/database.js";
 
 /**
  * Get a user from the database with added info like post, comment and friend count
@@ -78,31 +86,128 @@ const getAllUsers = async (req, res) => {
   });
 };
 
-// Rules that define the manual setting of a users data
-const dataRules = {
-  display_name: {
-    rank: 50,
-    type: "string",
-    check: checkDisplayName,
-  },
-  kakapo_id: {
-    rank: 70,
-    type: "string",
-    check: (kakapoId) => !kakapoIdTaken(kakapoId),
-  },
+const setDataDisplayName = async (req, res) => {
+  const { value } = req.body;
+
+  let trimmedDispayName = value.trim();
+  if (!checkDisplayName(trimmedDispayName)) {
+    return sendError(res, new BadParametersError({ badParameters: ["value"] }));
+  }
+
+  const [setDisplayNameError, setResult] = await global.db
+    .table("user")
+    .edit({ id: req.user.id }, { display_name: trimmedDispayName });
+  if (setDisplayNameError) {
+    return sendError(res, new GenericError());
+  }
+
+  return res.send({ success: true, value: trimmedDispayName });
 };
 
-const setUserDataRaw = async (req, res) => {};
+const setDataKakapoID = async (req, res) => {
+  const { value } = req.body;
+
+  let trimmedKakapoID = value.trim();
+  if (!checkKakapoId(trimmedKakapoID)) {
+    return sendError(res, new BadParametersError({ badParameters: ["value"] }));
+  }
+
+  const [checkIDError, isInUse] = await isKakapoIDInUse(trimmedKakapoID);
+  if (checkIDError) {
+    return sendError(res, new GenericError());
+  }
+  if (isInUse) {
+    return sendError(res, new KakapoIDReservedError());
+  }
+
+  const [setKakapoIDError, setResult] = await global.db
+    .table("user")
+    .edit({ id: req.user.id }, { kakapo_id: trimmedKakapoID });
+  if (setKakapoIDError) {
+    return sendError(res, new GenericError());
+  }
+
+  return res.send({ success: true, value: trimmedKakapoID });
+};
+
+const setDataRank = async (req, res) => {
+  const { value } = req.body;
+
+  if (typeof value !== "number" || clamp(value, 0, 255) !== value) {
+    return sendError(res, new BadParametersError({ badParameters: ["value"] }));
+  }
+
+  const [setRankError, setResult] = await global.db.table("user").edit({ id: req.user.id }, { rank: value });
+  if (setRankError) {
+    return sendError(res, new GenericError());
+  }
+
+  return res.send({ success: true, value: value });
+};
+
+const badgeRanks = [0, 70, 70, 100, 50, 255, 255];
+
+const setDataBadge = async (req, res) => {
+  const { value } = req.body;
+
+  if (typeof value !== "number" || clamp(value, 0, 6) !== value) {
+    return sendError(res, new BadParametersError({ badParameters: ["value"] }));
+  }
+
+  if (req.authenticatedUser.rank < badgeRanks[value]) {
+    return sendError(res, new RankTooLowError());
+  }
+
+  const [setRankError, setResult] = await global.db.table("user").edit({ id: req.user.id }, { badge: value });
+  if (setRankError) {
+    return sendError(res, new GenericError());
+  }
+
+  return res.send({ success: true, value: value });
+};
 
 const getStaffUserRoutes = () => {
   const router = express.Router();
+
+  const requireValueMiddleware = requireData(["value"]);
 
   router.get("/", getUserAtSensitivity(50));
   router.get("/details", resolveUserMiddleware, getFullUserData);
   router.get("/range", getUsers);
   router.get("/all", isRank(process.env.ELEVATED_DEVELOPER), getAllUsers);
 
-  router.get("/set", setUserDataRaw);
+  router.put(
+    "/data/displayname",
+    isRank(process.env.RANK_MODERATOR),
+    requireValueMiddleware,
+    resolveUserMiddleware,
+    rankExceeds,
+    setDataDisplayName
+  );
+  router.put(
+    "/data/kakapoid",
+    isRank(process.env.ADMIN),
+    requireValueMiddleware,
+    resolveUserMiddleware,
+    rankExceeds,
+    setDataKakapoID
+  );
+  router.put(
+    "/data/rank",
+    isRank(process.env.ADMIN),
+    requireValueMiddleware,
+    resolveUserMiddleware,
+    rankExceeds,
+    setDataRank
+  );
+  router.put(
+    "/data/badge",
+    isRank(process.env.RANK_MODERATOR),
+    requireValueMiddleware,
+    resolveUserMiddleware,
+    rankExceeds,
+    setDataBadge
+  );
 
   return router;
 };

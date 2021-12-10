@@ -119,6 +119,13 @@ class SelfFriendRequestError extends APIError {
   }
 }
 
+class KakapoIDReservedError extends APIError {
+  constructor(errorData) {
+    super("This Kakapo ID has already been reserved", "114", errorData);
+    this.name = "KakapoIDReservedError";
+  }
+}
+
 class GenericError extends APIError {
   constructor(errorData) {
     super("Server error.", "200", errorData);
@@ -227,4 +234,5 @@ export {
   CommentNotFoundError,
   PendingFriendRequestError,
   SelfFriendRequestError,
+  KakapoIDReservedError,
 };
