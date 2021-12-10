@@ -1,5 +1,5 @@
 import { checkRequiredParameters } from "../utils/validations.js";
-import { sendError, MissingParametersError } from "../errors/apierrors";
+import { sendError, MissingParametersError } from "../errors/apierrors.js";
 
 const requireData = (parameters, source = "body") => {
   return async (req, res, next) => {
