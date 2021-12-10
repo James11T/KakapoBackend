@@ -74,6 +74,11 @@ class DBWrapper {
     let success = true;
 
     this.pool.getConnection((err, connection) => {
+      if (err) {
+        success = false;
+        return;
+      }
+
       tables.forEach((table) => {
         const newTable = table(this);
         this.tables[newTable.name] = newTable;
