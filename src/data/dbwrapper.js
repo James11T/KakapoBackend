@@ -75,6 +75,7 @@ class DBWrapper {
 
     this.pool.getConnection((err, connection) => {
       if (err) {
+        console.log("Database connection failed");
         success = false;
         return;
       }
