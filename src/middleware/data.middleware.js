@@ -2,50 +2,61 @@ import { checkRequiredParameters } from "../utils/validations.js";
 import {
   sendError,
   MissingParametersError,
-  GenericError,
   PostNotFoundError,
   CommentNotFoundError,
   UserNotFoundError,
 } from "../errors/apierrors.js";
 
-/**
- * Dynamic middleware to definitively resolve a table row and append it to the requests
- * Used to prevent repetition in the functions that require data in the body
- *
- * @param {string} table The table to query
- * @param {string} field The body field to check body
- * @param {APIError} error The error to dispatch if the resolve fails
- *
- * @return {function} The middleware to use
- */
-const resolveDatabaseEntry = (table, field, error, column = "public_id") => {
+const resolveParam = async (table, column, value) => {
+  let conditional = {};
+  conditional[column] = value;
+
+  return await global.db.table(table).first("*", conditional);
+};
+
+const resolveRequestData = async (table, column, container, field, error) => {
   return async (req, res, next) => {
-    const [hasRequiredParameters, missingParameters] = checkRequiredParameters(req.body, [field]);
+    const [hasRequiredParameters, missingParameters] = checkRequiredParameters(req[container], [field]);
     if (!hasRequiredParameters) {
       return sendError(res, new MissingParametersError({ missingParameters: missingParameters }));
     }
 
-    const fieldValue = req.body[field];
-    let conditional = {};
-    conditional[column] = fieldValue;
-
-    const [getPostError, result] = await global.db.table(table).first("*", conditional);
-    if (getPostError) {
-      return sendError(res, new GenericError());
+    let [resolveError, resolveResult] = await resolveParam(table, column, req[container][field]);
+    if (resolveError) {
+      return sendError(res, resolveError);
     }
 
-    if (!result) {
+    if (!resolveResult) {
       return sendError(res, new error());
     }
 
-    req[table] = result;
+    req[table] = resolveResult;
 
     return next();
   };
 };
 
-const resolvePostMiddleware = resolveDatabaseEntry("post", "post_id", PostNotFoundError);
-const resolveCommentMiddleware = resolveDatabaseEntry("comment", "comment_id", CommentNotFoundError);
-const resolveUserMiddleware = resolveDatabaseEntry("user", "kakapo_id", UserNotFoundError, "kakapo_id");
+const resolveBodyData = async (table, column, field, error) => {
+  return resolveRequestData(table, column, "body", field, error);
+};
 
-export { resolvePostMiddleware, resolveCommentMiddleware, resolveUserMiddleware, resolveDatabaseEntry };
+const resolveParamData = async (table, column, field, error) => {
+  return resolveRequestData(table, column, "params", field, error);
+};
+
+const bodyPostMiddleware = resolveBodyData("post", "post_id", "post_id", PostNotFoundError);
+const bodyCommentMiddleware = resolveBodyData("comment", "comment_id", "comment_id", CommentNotFoundError);
+const bodyUserMiddleware = resolveBodyData("user", "kakapo_id", "kakapo_id", UserNotFoundError);
+
+const paramPostMiddleware = resolveParamData("post", "post_id", "post_id", PostNotFoundError);
+const paramCommentMiddleware = resolveParamData("comment", "comment_id", "comment_id", CommentNotFoundError);
+const paramUserMiddleware = resolveParamData("user", "kakapo_id", "kakapo_id", UserNotFoundError);
+
+export {
+  bodyPostMiddleware,
+  bodyCommentMiddleware,
+  bodyUserMiddleware,
+  paramPostMiddleware,
+  paramCommentMiddleware,
+  paramUserMiddleware,
+};
