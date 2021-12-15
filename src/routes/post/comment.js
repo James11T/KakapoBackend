@@ -10,26 +10,10 @@ import {
 import { checkRequiredParameters } from "../../utils/validations.js";
 import { getEpoch, generatePublicId, clamp } from "../../utils/funcs.js";
 import { isAuthenticated } from "../../middleware/auth.middleware.js";
-import { resolvePostMiddleware, resolveCommentMiddleware } from "../../middleware/data.middleware.js";
+import { paramCommentMiddleware, paramPostMiddleware } from "../../middleware/data.middleware.js";
 
 const getComment = async (req, res) => {
-  const [hasRequiredParameters, missingParameters] = checkRequiredParameters(req.body, ["comment_id"]);
-  if (!hasRequiredParameters) {
-    return sendError(res, new MissingParametersError({ missingParameters: missingParameters }));
-  }
-
-  const { comment_id } = req.body;
-
-  const [getCommentError, comment] = await global.db.table("comment").first("*", { public_id: comment_id });
-  if (getCommentError) {
-    return sendError(res, new GenericError());
-  }
-
-  if (!comment) {
-    return sendError(res, new CommentNotFoundError());
-  }
-
-  return res.send({ comment: global.db.table("comment").filter(comment, 0) });
+  return res.send({ comment: global.db.table("comment").filter(req.comment, 0) });
 };
 
 const getCommentCount = async (req, res) => {
@@ -115,7 +99,7 @@ const editPostComment = async (req, res) => {
 };
 
 const getCommentsInRange = async (req, res) => {
-  let { from = 0, count = 10 } = req.body;
+  let { from = 0, count = 10 } = req.query;
 
   try {
     from = Number(from);
@@ -145,13 +129,13 @@ const getCommentsInRange = async (req, res) => {
 const getPostCommentRoutes = () => {
   const router = express.Router();
 
-  router.get("/", getComment);
-  router.post("/", isAuthenticated, resolvePostMiddleware, addPostComment);
-  router.put("/", isAuthenticated, resolveCommentMiddleware, editPostComment);
-  router.delete("/", isAuthenticated, resolveCommentMiddleware, deletePostComment);
+  router.get("/:comment_id", paramCommentMiddleware, getComment);
+  router.post("/:post_id", isAuthenticated, paramPostMiddleware, addPostComment);
+  router.put("/:comment_id", isAuthenticated, paramCommentMiddleware, editPostComment);
+  router.delete("/:comment_id", isAuthenticated, paramCommentMiddleware, deletePostComment);
 
-  router.get("/count", resolvePostMiddleware, getCommentCount);
-  router.get("/range", resolvePostMiddleware, getCommentsInRange);
+  router.get("/count/:post_id", paramPostMiddleware, getCommentCount);
+  router.get("/range/:post_id", paramPostMiddleware, getCommentsInRange);
 
   return router;
 };

@@ -49,7 +49,7 @@ const deletePost = async (post, deleteFile = true) => {
   }
 
   if (deleteFile) {
-    await fs.promises.unlink(`.${req.post.media}`);
+    await fs.promises.unlink(`.${post.media}`);
   }
 
   return [null, deletePostResult];

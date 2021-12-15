@@ -8,7 +8,7 @@ import {
   SelfFriendRequestError,
 } from "../../errors/apierrors.js";
 import { isAuthenticated } from "../../middleware/auth.middleware.js";
-import { resolveUserMiddleware } from "../../middleware/data.middleware.js";
+import { paramUserMiddleware } from "../../middleware/data.middleware.js";
 import { usersAreFriends, orderedFriendQuery } from "../../utils/database.js";
 import { getEpoch } from "../../utils/funcs.js";
 
@@ -127,10 +127,10 @@ const getAllFriendRequests = async (req, res) => {
 const getUserFriendRoutes = () => {
   const router = express.Router();
 
-  router.get("/count", resolveUserMiddleware, getFriendCount);
+  router.get("/count/:kakapo_id", paramUserMiddleware, getFriendCount);
   router.get("/request/all", isAuthenticated, getAllFriendRequests);
-  router.post("/request/send", isAuthenticated, resolveUserMiddleware, sendFriendRequest);
-  router.post("/request/accept", isAuthenticated, resolveUserMiddleware, acceptFriendRequest);
+  router.post("/request/send/:kakapo_id", isAuthenticated, paramUserMiddleware, sendFriendRequest);
+  router.post("/request/accept/:kakapo_id", isAuthenticated, paramUserMiddleware, acceptFriendRequest);
 
   return router;
 };

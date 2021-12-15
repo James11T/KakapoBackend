@@ -1,11 +1,10 @@
 import express from "express";
 
-import { getUserAtSensitivity } from "../shared.js";
 import { clamp } from "../../utils/funcs.js";
 import { checkDisplayName, checkKakapoId } from "../../utils/validations.js";
 import { isRank, rankExceeds } from "../../middleware/auth.middleware.js";
 import { requireData } from "../../middleware/request.middleware.js";
-import { resolveUserMiddleware } from "../../middleware/data.middleware.js";
+import { paramUserMiddleware } from "../../middleware/data.middleware.js";
 import {
   BadParametersError,
   GenericError,
@@ -44,7 +43,7 @@ const getUsers = async (req, res) => {
    * Get 'count' user entries after the 'from'th entry
    */
 
-  let { from = 0, count = 20 } = req.body;
+  let { from = 0, count = 20 } = req.query;
 
   try {
     from = Number(from);
@@ -166,45 +165,49 @@ const setDataBadge = async (req, res) => {
   return res.send({ success: true, value: value });
 };
 
+const getUser = async (req, res) => {
+  return res.send({ user: global.db.table("user").filter(req.user, 50) });
+};
+
 const getStaffUserRoutes = () => {
   const router = express.Router();
 
   const requireValueMiddleware = requireData(["value"]);
 
-  router.get("/", getUserAtSensitivity(50));
-  router.get("/details", resolveUserMiddleware, getFullUserData);
+  router.get("/details/:kakapo_id", paramUserMiddleware, getFullUserData);
   router.get("/range", getUsers);
   router.get("/all", isRank(process.env.ELEVATED_DEVELOPER), getAllUsers);
+  router.get("/:kakapo_id", paramUserMiddleware, getUser);
 
   router.put(
-    "/data/displayname",
+    "/data/displayname/:kakapo_id",
     isRank(process.env.RANK_MODERATOR),
     requireValueMiddleware,
-    resolveUserMiddleware,
+    paramUserMiddleware,
     rankExceeds,
     setDataDisplayName
   );
   router.put(
-    "/data/kakapoid",
+    "/data/kakapoid:kakapo_id",
     isRank(process.env.ADMIN),
     requireValueMiddleware,
-    resolveUserMiddleware,
+    paramUserMiddleware,
     rankExceeds,
     setDataKakapoID
   );
   router.put(
-    "/data/rank",
+    "/data/rank:kakapo_id",
     isRank(process.env.ADMIN),
     requireValueMiddleware,
-    resolveUserMiddleware,
+    paramUserMiddleware,
     rankExceeds,
     setDataRank
   );
   router.put(
-    "/data/badge",
+    "/data/badge:kakapo_id",
     isRank(process.env.RANK_MODERATOR),
     requireValueMiddleware,
-    resolveUserMiddleware,
+    paramUserMiddleware,
     rankExceeds,
     setDataBadge
   );

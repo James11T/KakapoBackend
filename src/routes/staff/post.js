@@ -3,7 +3,7 @@ import express from "express";
 import { GenericError, MissingParametersError, PostNotFoundError, sendError } from "../../errors/apierrors.js";
 import { checkRequiredParameters } from "../../utils/validations.js";
 import { deletePost } from "../../utils/database.js";
-import { resolvePostMiddleware } from "../../middleware/data.middleware.js";
+import { paramPostMiddleware } from "../../middleware/data.middleware.js";
 
 const deletePostEndpoint = async (req, res) => {
   const [hasRequiredParameters, missingParameters] = checkRequiredParameters(req.body, ["post_id"]);
@@ -32,7 +32,7 @@ const deletePostEndpoint = async (req, res) => {
 const getStaffPostRoutes = () => {
   const router = express.Router();
 
-  router.delete("/", resolvePostMiddleware, deletePostEndpoint);
+  router.delete("/:post_id", paramPostMiddleware, deletePostEndpoint);
 
   return router;
 };

@@ -14,7 +14,7 @@ const resolveParam = async (table, column, value) => {
   return await global.db.table(table).first("*", conditional);
 };
 
-const resolveRequestData = async (table, column, container, field, error) => {
+const resolveRequestData = (table, column, container, field, error) => {
   return async (req, res, next) => {
     const [hasRequiredParameters, missingParameters] = checkRequiredParameters(req[container], [field]);
     if (!hasRequiredParameters) {
@@ -36,20 +36,20 @@ const resolveRequestData = async (table, column, container, field, error) => {
   };
 };
 
-const resolveBodyData = async (table, column, field, error) => {
+const resolveBodyData = (table, column, field, error) => {
   return resolveRequestData(table, column, "body", field, error);
 };
 
-const resolveParamData = async (table, column, field, error) => {
+const resolveParamData = (table, column, field, error) => {
   return resolveRequestData(table, column, "params", field, error);
 };
 
-const bodyPostMiddleware = resolveBodyData("post", "post_id", "post_id", PostNotFoundError);
-const bodyCommentMiddleware = resolveBodyData("comment", "comment_id", "comment_id", CommentNotFoundError);
+const bodyPostMiddleware = resolveBodyData("post", "public_id", "post_id", PostNotFoundError);
+const bodyCommentMiddleware = resolveBodyData("comment", "public_id", "comment_id", CommentNotFoundError);
 const bodyUserMiddleware = resolveBodyData("user", "kakapo_id", "kakapo_id", UserNotFoundError);
 
-const paramPostMiddleware = resolveParamData("post", "post_id", "post_id", PostNotFoundError);
-const paramCommentMiddleware = resolveParamData("comment", "comment_id", "comment_id", CommentNotFoundError);
+const paramPostMiddleware = resolveParamData("post", "public_id", "post_id", PostNotFoundError);
+const paramCommentMiddleware = resolveParamData("comment", "public_id", "comment_id", CommentNotFoundError);
 const paramUserMiddleware = resolveParamData("user", "kakapo_id", "kakapo_id", UserNotFoundError);
 
 export {

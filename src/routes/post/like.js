@@ -2,7 +2,7 @@ import express from "express";
 import { GenericError, sendError, AlreadyLikedError, NotLikedError } from "../../errors/apierrors.js";
 import { getEpoch } from "../../utils/funcs.js";
 import { isAuthenticated } from "../../middleware/auth.middleware.js";
-import { resolvePostMiddleware } from "../../middleware/data.middleware.js";
+import { paramPostMiddleware } from "../../middleware/data.middleware.js";
 
 const getLikeCount = async (req, res) => {
   const [countError, count] = await global.db.table("like").count({ post: req.post.id });
@@ -60,9 +60,9 @@ const unlikePost = async (req, res) => {
 const getPostLikeRoutes = () => {
   const router = express.Router();
 
-  router.get("/count", resolvePostMiddleware, getLikeCount);
-  router.post("/", isAuthenticated, resolvePostMiddleware, likePost);
-  router.delete("/", isAuthenticated, resolvePostMiddleware, unlikePost);
+  router.get("/count/:post_id", paramPostMiddleware, getLikeCount);
+  router.post("/:post_id", isAuthenticated, paramPostMiddleware, likePost);
+  router.delete("/:post_id", isAuthenticated, paramPostMiddleware, unlikePost);
 
   return router;
 };

@@ -12,7 +12,7 @@ import { generatePublicId, getEpoch } from "../utils/funcs.js";
 import { checkRequiredParameters } from "../utils/validations.js";
 import { deletePost } from "../utils/database.js";
 import { isAuthenticated } from "../middleware/auth.middleware.js";
-import { resolvePostMiddleware } from "../middleware/data.middleware.js";
+import { paramPostMiddleware } from "../middleware/data.middleware.js";
 
 const getPost = async (req, res) => {
   return res.send({ post: global.db.table("post").filter(req.post, 0) });
@@ -93,12 +93,12 @@ const repostPost = async (req, res) => {};
 const getPostRoutes = () => {
   const router = express.Router();
 
-  router.get("/", resolvePostMiddleware, getPost);
+  router.get("/:post_id", paramPostMiddleware, getPost);
   router.post("/", isAuthenticated, createPost);
-  router.delete("/", isAuthenticated, resolvePostMiddleware, deletePostEndpoint);
-  router.put("/", isAuthenticated, resolvePostMiddleware, editPost);
+  router.delete("/:post_id", isAuthenticated, paramPostMiddleware, deletePostEndpoint);
+  router.put("/:post_id", isAuthenticated, paramPostMiddleware, editPost);
 
-  router.post("/repost", isAuthenticated, resolvePostMiddleware, repostPost);
+  router.post("/repost/:post_id", isAuthenticated, paramPostMiddleware, repostPost);
 
   router.use("/like", getPostLikeRoutes());
   router.use("/comment", getPostCommentRoutes());
