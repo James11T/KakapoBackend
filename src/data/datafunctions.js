@@ -6,6 +6,7 @@ import {
 } from "../errors/apierrors.js";
 import { getEpoch, getUUID } from "../utils/funcs.js";
 import { checkRequiredParameters, checkEmail, checkKakapoId, checkPassword } from "../utils/validations.js";
+import { isKakapoIDInUse } from "../utils/database.js";
 import { hashPassword, toPasswordHashString } from "../auth/passwords.js";
 
 /**
@@ -25,7 +26,6 @@ const createNewUser = async (data) => {
   }
 
   let { kakapo_id, email, password, display_name } = data;
-  display_name = display_name.trim();
   kakapo_id = kakapo_id.trim();
 
   if (!checkEmail(email)) {
@@ -37,6 +37,7 @@ const createNewUser = async (data) => {
   }
 
   if (display_name) {
+    display_name = display_name.trim();
     if (!checkDisplayName(display_name)) {
       return [new BadParametersError({ badParameters: ["display_name"] }), null];
     }
