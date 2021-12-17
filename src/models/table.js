@@ -93,20 +93,44 @@ class Table {
   /**
    * Turns an object whos keys are fields into a string for after WHERE
    * E.g.
-   * { a: "xyz", b: "abc" } -> ["(`a`=? OR `b`=?)", ["xyz", "abc"]]
+   * { a: "xyz", b: "abc" }, "OR" -> ["(`a`=? OR `b`=?)", ["xyz", "abc"]]
+   * { a: { operator: "LIKE", value: "xyz", caseInsensitive: true}, b: "abc" } -> ["(LOWER(`a`) LIKE 'xyz' OR `b`=?)", ["xyz", "abc"]]
    *
-   * @param {Object} config An object whos keys are column names
+   * Conditional values can be strings or objects, strings are used with equal operator
+   * Objects are expanded with custom operators, values and case insensitivity
+   * { operator?: "LIKE", value: "xyz", caseInsensitive?: true}
+   *
+   *
+   * @param {Object} conditional An object whos keys are column names
    * @param {string} operator The operator to compare join the query
    *
    * @return {*[string, *[]]} The operators joined with the values extracted into a seperate list
    */
-  basicOperatorJoin(config, operator) {
-    const keys = Object.keys(config);
+  parseConditionals(conditional, operator) {
+    const keys = Object.keys(conditional);
 
-    let whereString = keys.map((key) => `\`${key}\`=?`).join(` ${operator} `);
-    whereString = `(${whereString})`;
+    let whereValues = [];
+    let whereFragments = keys.map((key) => {
+      let keyData = conditional[key];
+      if (typeof keyData == "object") {
+        if (!keyData.operator) {
+          keyData.operator = "=";
+        }
 
-    let whereValues = keys.map((key) => config[key]);
+        if (keyData.caseInsensitive) {
+          whereValues.push(keyData.value.toLowerCase());
+          return `LOWER(\`${key}\`) ${keyData.operator} ?`;
+        }
+
+        whereValues.push(keyData.value);
+        return `\`${key}\` ${keyData.operator} ?`;
+      } else {
+        whereValues.push(keyData);
+        return `\`${key}\` = ?`;
+      }
+    });
+
+    let whereString = whereFragments.join(` ${operator} `);
 
     return [whereString, whereValues];
   }
@@ -116,18 +140,18 @@ class Table {
    * E.g.
    * { a: "xyz", b: "abc" } -> "WHERE (`a`=? OR `b`=?)", ["xyz", "abc"]
    *
-   * @return {*[string, *[]]} The operators joined with the values extracted into a seperate list
+   * @return {*[]} The operators joined with the values extracted into a seperate list
    */
-  whereQueryToWhereString(query, operator = "AND") {
-    if (!query) {
+  whereQueryToWhereString(conditional, operator = "AND") {
+    if (!conditional) {
       return ["", []];
     }
 
-    if (Object.keys(query).length === 0) {
+    if (Object.keys(conditional).length === 0) {
       return ["", []];
     }
 
-    const [whereString, whereValues] = this.basicOperatorJoin(query, operator);
+    const [whereString, whereValues] = this.parseConditionals(conditional, operator);
     return [` WHERE ${whereString}`, whereValues];
   }
 
@@ -351,6 +375,7 @@ class Table {
    * @param {boolean} [returnFirst = false] If true, return the first result and discard other results
    */
   async queryAndReturn(queryString, queryValues, returnFirst = false) {
+    console.log("QUERY: ", queryString, queryValues);
     let [err, result] = await this.db.query(queryString, queryValues);
     if (err) {
       return [err, null];
@@ -387,10 +412,10 @@ class Table {
    *
    * @return {*[APIError, Object[]]} An error, if errored, and the rows
    */
-  async all() {
-    const queryString = this.buildSelectAllQuery();
+  async all(fields, conditional, operator = "AND") {
+    const [queryString, queryValues] = this.buildSelectQuery(fields || "*", conditional || {});
 
-    return await this.queryAndReturn(queryString);
+    return await this.queryAndReturn(queryString, queryValues, false);
   }
 
   /**
