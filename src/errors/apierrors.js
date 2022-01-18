@@ -13,11 +13,16 @@
 
 class APIError extends Error {
   constructor(message, code, errorData = {}) {
-    super(message);
+    if (typeof errorData === "string") {
+      message = errorData;
+      super(message);
+    } else {
+      super(message);
+      this.errorData = errorData;
+    }
 
     this.name = "APIError";
     this.code = code;
-    this.errorData = errorData;
   }
 }
 
@@ -30,7 +35,11 @@ class MissingParametersError extends APIError {
 
 class BadParametersError extends APIError {
   constructor(errorData) {
-    super("The supplied parameters were not in expected form.", "101", errorData);
+    super(
+      "The supplied parameters were not in expected form.",
+      "101",
+      errorData
+    );
     this.name = "BadParametersError";
   }
 }
@@ -107,7 +116,11 @@ class NotLikedError extends APIError {
 
 class PendingFriendRequestError extends APIError {
   constructor(errorData) {
-    super("You already have a pending friend request with this user.", "112", errorData);
+    super(
+      "You already have a pending friend request with this user.",
+      "112",
+      errorData
+    );
     this.name = "PendingFriendRequestError";
   }
 }
@@ -135,14 +148,14 @@ class GenericError extends APIError {
 
 class DatabaseError extends APIError {
   constructor(errorData) {
-    super("An error occourred when accessing the database.", "300", errorData);
+    super("An error occurred when accessing the database.", "300", errorData);
     this.name = "DatabaseError";
   }
 }
 
 class QueryFailedError extends APIError {
   constructor(errorData) {
-    super("An error occourred when performing query.", "301", errorData);
+    super("An error occurred when performing query.", "301", errorData);
     this.name = "QueryFailedError";
   }
 }
@@ -163,7 +176,11 @@ class WrongCredentialsError extends APIError {
 
 class NotAuthenticatedError extends APIError {
   constructor(errorData) {
-    super("You must be authenticated to access this endpoint.", "401", errorData);
+    super(
+      "You must be authenticated to access this endpoint.",
+      "401",
+      errorData
+    );
     this.name = "NotAuthenticatedError";
   }
 }
@@ -184,14 +201,22 @@ class BadTokenError extends APIError {
 
 class RankTooLowError extends APIError {
   constructor(errorData) {
-    super("You are not authenticated to access this endpoint.", "404", errorData);
+    super(
+      "You are not authenticated to access this endpoint.",
+      "404",
+      errorData
+    );
     this.name = "RankTooLowError";
   }
 }
 
 class IsAuthenticatedError extends APIError {
   constructor(errorData) {
-    super("This endpoint requires you to not be authenticated.", "405", errorData);
+    super(
+      "This endpoint requires you to not be authenticated.",
+      "405",
+      errorData
+    );
     this.name = "IsAuthenticatedError";
   }
 }
@@ -205,7 +230,11 @@ class IsAuthenticatedError extends APIError {
  * @return {Object} The response data
  */
 const sendError = (res, error) => {
-  return res.send({ error: error.code, message: error.message, ...error.errorData });
+  return res.send({
+    error: error.code,
+    message: error.message,
+    ...error.errorData,
+  });
 };
 
 export {
