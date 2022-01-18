@@ -1,11 +1,19 @@
+import { db } from "../database.js";
+
 import {
+  sendError,
   MissingParametersError,
   BadParametersError,
   GenericError,
   KakapoIDReservedError,
 } from "../errors/apierrors.js";
 import { getEpoch, getUUID } from "../utils/funcs.js";
-import { checkRequiredParameters, checkEmail, checkKakapoId, checkPassword } from "../utils/validations.js";
+import {
+  checkRequiredParameters,
+  checkEmail,
+  checkKakapoId,
+  checkPassword,
+} from "../utils/validations.js";
 import { isKakapoIDInUse } from "../utils/database.js";
 import { hashPassword, toPasswordHashString } from "../auth/passwords.js";
 
@@ -20,9 +28,15 @@ import { hashPassword, toPasswordHashString } from "../auth/passwords.js";
  * @returns {[error, result]} The error, if errored, or the result if succeeded
  */
 const createNewUser = async (data) => {
-  const [hasRequiredParameters, missingParameters] = checkRequiredParameters(data, ["kakapo_id", "email", "password"]);
+  const [hasRequiredParameters, missingParameters] = checkRequiredParameters(
+    data,
+    ["kakapo_id", "email", "password"]
+  );
   if (!hasRequiredParameters) {
-    return [new MissingParametersError({ missingParameters: missingParameters }), null];
+    return [
+      new MissingParametersError({ missingParameters: missingParameters }),
+      null,
+    ];
   }
 
   let { kakapo_id, email, password, display_name } = data;
@@ -39,7 +53,10 @@ const createNewUser = async (data) => {
   if (display_name) {
     display_name = display_name.trim();
     if (!checkDisplayName(display_name)) {
-      return [new BadParametersError({ badParameters: ["display_name"] }), null];
+      return [
+        new BadParametersError({ badParameters: ["display_name"] }),
+        null,
+      ];
     }
   } else {
     display_name = kakapo_id;
@@ -51,29 +68,30 @@ const createNewUser = async (data) => {
 
   const [checkIDError, isInUse] = await isKakapoIDInUse(kakapo_id);
   if (checkIDError) {
-    return sendError(res, new GenericError());
+    console.error(checkIDError);
+    return [new GenericError("Failed to check kakapo ID."), null];
   }
   if (isInUse) {
-    return sendError(res, new KakapoIDReservedError());
+    return [new KakapoIDReservedError(), null];
   }
 
   const { salt, hash } = await hashPassword(password);
 
-  let newUser = {
+  let newUserData = {
     kakapo_id: kakapo_id,
     display_name: display_name,
     email: email,
     password: toPasswordHashString(salt, hash),
-    joined: getEpoch(),
+    joined_at: getEpoch(),
     public_id: getUUID(),
   };
 
-  const [createUserError, createUserResults] = await global.db.table("user").new(newUser);
-  if (createUserError) {
-    return [createUserError, null];
+  try {
+    const newUser = await db.models.user.create(newUserData);
+    return [null, newUser];
+  } catch (error) {
+    return [error, null];
   }
-
-  return [null, createUserResults];
 };
 
 export { createNewUser };

@@ -1,60 +1,74 @@
 import express from "express";
-import { GenericError, sendError, AlreadyLikedError, NotLikedError } from "../../errors/apierrors.js";
+import {
+  GenericError,
+  sendError,
+  AlreadyLikedError,
+  NotLikedError,
+} from "../../errors/apierrors.js";
 import { getEpoch } from "../../utils/funcs.js";
 import { isAuthenticated } from "../../middleware/auth.middleware.js";
 import { paramPostMiddleware } from "../../middleware/data.middleware.js";
+import { db } from "../../database.js";
 
 const getLikeCount = async (req, res) => {
-  const [countError, count] = await global.db.table("like").count({ post: req.post.id });
-  if (countError) {
-    return sendError(res, new GenericError());
+  try {
+    const count = await db.models.like.count({ where: { post: req.post.id } });
+    return res.send({ count: count });
+  } catch (error) {
+    return sendError(res, new GenericError("Failed to count likes."));
   }
-
-  return res.send({ count: count });
 };
 
 const likePost = async (req, res) => {
-  const [getLikerError, likerResult] = await global.db
-    .table("like")
-    .first("*", { post: req.post.id, liker: req.authenticatedUser.id });
-  if (getLikerError) {
-    return sendError(res, new GenericError());
+  try {
+    const likeResult = await db.models.like.findOne({
+      where: {
+        post: req.post.id,
+        liker: req.authenticatedUser.id,
+      },
+    });
+
+    if (likeResult) {
+      return sendError(res, new AlreadyLikedError());
+    }
+  } catch (error) {
+    return sendError(res, new GenericError("Failed to retrieve like."));
   }
 
-  if (likerResult) {
-    return sendError(res, new AlreadyLikedError());
-  }
+  const newLikeData = {
+    post: req.post.id,
+    liker: req.authenticatedUser.id,
+    liked_at: getEpoch(),
+  };
 
-  const [createLikeError, createLikeResult] = await global.db
-    .table("like")
-    .new({ post: req.post.id, liker: req.authenticatedUser.id, liked_at: getEpoch() });
-  if (createLikeError) {
-    return sendError(res, new GenericError());
+  try {
+    await db.models.like.create(newLikeData);
+    return res.send({ success: true });
+  } catch (error) {
+    return sendError(res, new GenericError("Failed to create new like."));
   }
-
-  return res.send({ success: true });
 };
 
 const unlikePost = async (req, res) => {
-  const [getLikerError, likerResult] = await global.db
-    .table("like")
-    .first("*", { post: req.post.id, liker: req.authenticatedUser.id });
-  if (getLikerError) {
-    return sendError(res, new GenericError());
+  try {
+    const getLike = await db.models.like.findOne({
+      where: { post: req.post.id, liker: req.authenticatedUser.id },
+    });
+    if (!getLike) {
+      return sendError(res, new NotLikedError());
+    }
+  } catch (error) {
+    return sendError(res, new GenericError("Failed to retrieve like."));
   }
 
-  if (!likerResult) {
-    return sendError(res, new NotLikedError());
+  try {
+    await db.models.like.destroy({
+      where: { post: req.post.id, liker: req.authenticatedUser.id },
+    });
+    return res.send({ success: true });
+  } catch (error) {
+    return sendError(res, new GenericError("Failed to delete like."));
   }
-
-  const [deleteLikeError, deleteLikeResult] = await global.db
-    .table("like")
-    .delete({ post: req.post.id, liker: req.authenticatedUser.id });
-  if (deleteLikeError) {
-    return sendError(res, new GenericError());
-  }
-
-  return res.send({ success: true });
 };
 
 const getPostLikeRoutes = () => {

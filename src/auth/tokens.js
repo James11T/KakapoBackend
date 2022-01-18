@@ -1,5 +1,6 @@
 import jwt from "jsonwebtoken";
 import { getEpoch } from "../utils/funcs.js";
+import { db } from "../database.js";
 
 import { BadTokenError, NotAuthenticatedError } from "../errors/apierrors.js";
 
@@ -13,9 +14,13 @@ const signToken = (public_id) => {
   const epoch = getEpoch();
 
   try {
-    const token = jwt.sign({ public_id: public_id, created: epoch }, process.env.TOKEN_SECRET, {
-      expiresIn: process.env.TOKEN_TTL,
-    });
+    const token = jwt.sign(
+      { public_id: public_id, created: epoch },
+      process.env.TOKEN_SECRET,
+      {
+        expiresIn: process.env.TOKEN_TTL,
+      }
+    );
 
     return [null, token];
   } catch (tokenError) {
@@ -45,12 +50,16 @@ const decodeToken = (token) => {
  * @returns {Object[]} [An error if one occoured, The user who the token belongs to]
  */
 const tokenToUser = async (token) => {
-  const [queryError, tokenUser] = await global.db.table("user").first("*", { public_id: token.public_id });
-  if (queryError) {
-    return [queryError, null];
+  try {
+    const user = await db.models.user.findOne({
+      where: {
+        public_id: token.public_id,
+      },
+    });
+    return [null, user];
+  } catch (error) {
+    return [error, null];
   }
-
-  return [null, tokenUser];
 };
 
 /**

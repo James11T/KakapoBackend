@@ -1,9 +1,9 @@
 import express from "express";
+import { db } from "./database.js";
+import "./models/index.js";
 
 import { getRoutes } from "./routes/index.js";
 import { authenticateRequest } from "./middleware/auth.middleware.js";
-import DBWrapper from "./data/dbwrapper.js";
-import models from "./models/tables/index.js";
 import fileUpload from "express-fileupload";
 import { logRequest } from "./middleware/logging.middleware.js";
 
@@ -17,18 +17,16 @@ import { logRequest } from "./middleware/logging.middleware.js";
 const startApp = async (apiBase, port = process.env.API_PORT) => {
   console.log("Initialising API");
   const app = express();
-  const db = new DBWrapper();
-  global.db = db;
 
-  // Register all tables with the database
-  // Create them if they dont exist
-  let tableSuccess = db.registerTables(models);
-
-  // Tables failed
-  if (!tableSuccess) {
-    console.log("Failed to create tables.");
-    return;
+  try {
+    await db.authenticate();
+    console.log("Database connection successful.");
+  } catch (error) {
+    console.log("Database connection failed.", error);
+    return false;
   }
+
+  await db.sync({ alter: true });
 
   app.use(express.json());
   app.use(
@@ -44,6 +42,8 @@ const startApp = async (apiBase, port = process.env.API_PORT) => {
   app.listen(port, () => {
     console.log(`Listening on http://localhost:${port}/`);
   });
+
+  return true;
 };
 
 export { startApp };

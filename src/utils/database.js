@@ -1,5 +1,5 @@
 import fs from "fs";
-
+import { db } from "../database.js";
 import { GenericError } from "../errors/apierrors.js";
 
 /**
@@ -28,12 +28,14 @@ const orderedFriendQuery = (user1, user2) => {
 const usersAreFriends = async (user1, user2) => {
   let friendshipQuery = orderedFriendQuery(user1, user2);
 
-  const [getFriendshipError, existingFiendResult] = await global.db.table("friendship").first("*", friendshipQuery);
-  if (getFriendshipError) {
-    return [new GenericError(), null];
+  try {
+    const friendship = await db.models.friendship.findOne({
+      where: friendshipQuery,
+    });
+    return [null, !!friendship];
+  } catch (error) {
+    return [new GenericError("Failed to retrieve findship."), null];
   }
-
-  return [null, !!existingFiendResult];
 };
 
 /**
@@ -43,32 +45,28 @@ const usersAreFriends = async (user1, user2) => {
  * @param {boolean} [deleteFile=true] Wether to delete the media file
  */
 const deletePost = async (post, deleteFile = true) => {
-  const [deletePostError, deletePostResult] = await global.db.table("post").delete({ id: post.id });
-  if (deletePostError) {
-    return [new GenericError(), null];
+  // SWITCH TO RETURN SUCCESS BOOL
+  try {
+    await db.models.post.destroy({ where: { id: post.id } });
+    if (deleteFile) {
+      await fs.promises.unlink(`.${post.media}`);
+    }
+    return true;
+  } catch (error) {
+    return false;
   }
-
-  if (deleteFile) {
-    await fs.promises.unlink(`.${post.media}`);
-  }
-
-  return [null, deletePostResult];
 };
 
-/**
- * Check if a Kakapo ID is in use
- *
- * @param {string} kakapoId
- *
- * @returns {boolean} True if the Kakapo ID is in use
- */
-const isKakapoIDInUse = async (kakapoId) => {
-  const [getUserError, user] = await global.db.table("user").first(["kakapo_id"], { kakapo_id: kakapoId });
-  if (getUserError) {
-    return [new GenericError(), null];
+const isKakapoIDInUse = async (kakapo_id) => {
+  try {
+    const user = await db.models.user.findOne({
+      attributes: ["kakapo_id"],
+      where: { kakapo_id: kakapo_id },
+    });
+    return [null, !!user];
+  } catch (error) {
+    return [error, null];
   }
-
-  return [null, !!user];
 };
 
 export { orderedFriendQuery, usersAreFriends, deletePost, isKakapoIDInUse };

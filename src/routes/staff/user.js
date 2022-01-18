@@ -1,4 +1,5 @@
 import express from "express";
+import { Op } from "sequelize";
 
 import { clamp } from "../../utils/funcs.js";
 import { checkDisplayName, checkKakapoId } from "../../utils/validations.js";
@@ -13,24 +14,34 @@ import {
   sendError,
 } from "../../errors/apierrors.js";
 import { isKakapoIDInUse } from "../../utils/database.js";
+import { db } from "../../database.js";
 
 /**
  * Get a user from the database with added info like post, comment and friend count
  */
 const getFullUserData = async (req, res) => {
-  const [postCountErr, postCount] = await global.db.table("post").count({ author: req.user.id });
-  const [friendCountErr, friendCount] = await global.db
-    .table("friendship")
-    .count({ user1: req.user.id, user2: req.user.id }, "OR");
-  const [commentCountErr, commentCount] = await global.db.table("comment").count({ author: req.user.id });
+  let postCount, friendCount, commentCount;
 
-  if (postCountErr || friendCountErr || commentCountErr) {
-    return sendError(res, new GenericError());
+  try {
+    const userId = req.user.id;
+    postCount = await db.models.post.count({ where: { author: userId } });
+
+    friendCount = await db.models.friendship.count({
+      where: { [Op.or]: [{ user1: userId }, { user2: userId }] },
+    });
+
+    commentCount = await db.models.comment.count({ where: { author: userId } });
+  } catch (error) {
+    return sendError(
+      res,
+      new GenericError("Failed to retrieve extra user data.")
+    );
   }
 
+  // ADD FILTER
   return res.send({
     user: {
-      ...global.db.table("user").filter(req.user, 50),
+      ...req.user,
       post_count: postCount,
       friend_count: friendCount,
       comment_count: commentCount,
@@ -60,14 +71,18 @@ const getUsers = async (req, res) => {
   count = clamp(count, 1, 50);
   from = Math.max(from, 0); // Minimum 0
 
-  const [queryError, queryResults] = await global.db.table("user").limit("*", {}, from, count);
-  if (queryError) {
-    return sendError(res, new GenericError());
+  try {
+    const results = await db.models.user.findAll({
+      limit: count,
+      offset: from,
+    });
+    return res.send({
+      // ADD FILTER
+      users: results,
+    });
+  } catch (error) {
+    return sendError(res, new GenericError("Failed to retrieve user."));
   }
-
-  return res.send({
-    users: queryResults.map((user) => global.db.table("user").filter(user, 50)),
-  });
 };
 
 const getAllUsers = async (req, res) => {
@@ -75,14 +90,15 @@ const getAllUsers = async (req, res) => {
    * Get all user entries
    */
 
-  const [queryError, queryResults] = await global.db.table("user").all();
-  if (queryError) {
-    return sendError(res, new GenericError());
+  try {
+    const result = await db.models.user.findAll();
+    // ADD FILTER
+    return res.send({
+      users: result,
+    });
+  } catch (error) {
+    return sendError(res, new GenericError("Failed to retrieve all users."));
   }
-
-  return res.send({
-    users: queryResults.map((user) => global.db.table("user").filter(user, 50)),
-  });
 };
 
 const setDataDisplayName = async (req, res) => {
@@ -93,14 +109,15 @@ const setDataDisplayName = async (req, res) => {
     return sendError(res, new BadParametersError({ badParameters: ["value"] }));
   }
 
-  const [setDisplayNameError, setResult] = await global.db
-    .table("user")
-    .edit({ id: req.user.id }, { display_name: trimmedDispayName });
-  if (setDisplayNameError) {
-    return sendError(res, new GenericError());
+  try {
+    const newUser = await db.models.user.update(
+      { display_name: trimmedDispayName },
+      { where: { id: req.user.id } }
+    );
+    return res.send({ success: true, value: newUser.display_name });
+  } catch (error) {
+    return sendError(res, new GenericError("Failed to set display name."));
   }
-
-  return res.send({ success: true, value: trimmedDispayName });
 };
 
 const setDataKakapoID = async (req, res) => {
@@ -113,20 +130,21 @@ const setDataKakapoID = async (req, res) => {
 
   const [checkIDError, isInUse] = await isKakapoIDInUse(trimmedKakapoID);
   if (checkIDError) {
-    return sendError(res, new GenericError());
+    return sendError(res, new GenericError("Failed to check kakapo ID."));
   }
   if (isInUse) {
     return sendError(res, new KakapoIDReservedError());
   }
 
-  const [setKakapoIDError, setResult] = await global.db
-    .table("user")
-    .edit({ id: req.user.id }, { kakapo_id: trimmedKakapoID });
-  if (setKakapoIDError) {
-    return sendError(res, new GenericError());
+  try {
+    const newUser = await db.models.user.update(
+      { kakapo_id: trimmedKakapoID },
+      { where: { id: req.user.id } }
+    );
+    return res.send({ success: true, value: newUser.kakapo_id });
+  } catch (error) {
+    return sendError(res, new GenericError("Failed to update kakapo ID."));
   }
-
-  return res.send({ success: true, value: trimmedKakapoID });
 };
 
 const setDataRank = async (req, res) => {
@@ -136,12 +154,15 @@ const setDataRank = async (req, res) => {
     return sendError(res, new BadParametersError({ badParameters: ["value"] }));
   }
 
-  const [setRankError, setResult] = await global.db.table("user").edit({ id: req.user.id }, { rank: value });
-  if (setRankError) {
-    return sendError(res, new GenericError());
+  try {
+    const newUser = await db.models.user.update(
+      { rank: value },
+      { where: { id: req.user.id } }
+    );
+    return res.send({ success: true, value: newUser.rank });
+  } catch (error) {
+    return sendError(res, new GenericError("Failed to update rank."));
   }
-
-  return res.send({ success: true, value: value });
 };
 
 const badgeRanks = [0, 70, 70, 100, 50, 255, 255];
@@ -157,16 +178,20 @@ const setDataBadge = async (req, res) => {
     return sendError(res, new RankTooLowError());
   }
 
-  const [setRankError, setResult] = await global.db.table("user").edit({ id: req.user.id }, { badge: value });
-  if (setRankError) {
-    return sendError(res, new GenericError());
+  try {
+    const newUser = await db.models.user.update(
+      { badge: value },
+      { where: { id: req.user.id } }
+    );
+    return res.send({ success: true, value: newUser.badge });
+  } catch (error) {
+    return sendError(res, new GenericError("Failed to update badge."));
   }
-
-  return res.send({ success: true, value: value });
 };
 
 const getUser = async (req, res) => {
-  return res.send({ user: global.db.table("user").filter(req.user, 50) });
+  // ADD FILTER
+  return res.send({ user: req.user });
 };
 
 const getStaffUserRoutes = () => {

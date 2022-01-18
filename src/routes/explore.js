@@ -1,24 +1,46 @@
 import express from "express";
+import { Op } from "sequelize";
 
 import { checkRequiredParameters } from "../utils/validations.js";
-import { sendError, MissingParametersError, GenericError } from "../errors/apierrors.js";
+import {
+  sendError,
+  MissingParametersError,
+  GenericError,
+} from "../errors/apierrors.js";
+import { db } from "../database.js";
 
 const explorePeople = async (req, res) => {
-  const [hasRequiredParameters, missingParameters] = checkRequiredParameters(req.params, ["search_term"]);
+  const [hasRequiredParameters, missingParameters] = checkRequiredParameters(
+    req.params,
+    ["search_term"]
+  );
   if (!hasRequiredParameters) {
-    return sendError(res, new MissingParametersError({ missingParameters: missingParameters }));
+    return sendError(
+      res,
+      new MissingParametersError({ missingParameters: missingParameters })
+    );
   }
 
   const { search_term } = req.params;
 
-  const [exploreError, exploreResult] = await global.db
-    .table("user")
-    .all("*", { kakapo_id: { operator: "LIKE", value: `%${search_term}%`, caseInsensitive: true } });
-  if (exploreError) {
-    return sendError(res, new GenericError());
-  }
+  try {
+    const exploreResult = await db.models.user.findAll({
+      where: {
+        [Op.or]: [
+          { kakapo_id: { [Op.substring]: search_term } },
+          { display_name: { [Op.substring]: search_term } },
+        ],
+      },
+    });
 
-  return res.send({ users: exploreResult.map((user) => global.db.table("user").filter(user, 0)) });
+    // ADD FILTER
+    return res.send({ users: exploreResult });
+  } catch (error) {
+    return sendError(
+      res,
+      new GenericError("Failed to search database for users.")
+    );
+  }
 };
 
 const getExploreRoutes = () => {

@@ -13,6 +13,7 @@ import { checkHash } from "../auth/passwords.js";
 import { signToken } from "../auth/tokens.js";
 import { createNewUser } from "../data/datafunctions.js";
 import { checkRequiredParameters } from "../utils/validations.js";
+import { db } from "../database.js";
 
 const signIn = async (req, res) => {
   /**
@@ -20,27 +21,46 @@ const signIn = async (req, res) => {
    * Gets the user from the database if it exists
    * Checks the credentials, if correct provides a JWT token
    */
-  const [hasRequiredParameters, missingParameters] = checkRequiredParameters(req.body, ["kakapo_id", "password"]);
+
+  console.log(req.headers.authorization);
+  if (req.authenticatedUser) {
+    return sendError(res, new IsAuthenticatedError());
+  }
+
+  const [hasRequiredParameters, missingParameters] = checkRequiredParameters(
+    req.body,
+    ["kakapo_id", "password"]
+  );
 
   if (!hasRequiredParameters) {
-    return sendError(res, new MissingParametersError({ missingParameters: missingParameters }));
+    return sendError(
+      res,
+      new MissingParametersError({ missingParameters: missingParameters })
+    );
   }
 
-  const [userQueryErr, userQueryResult] = await global.db.table("user").first("*", { kakapo_id: req.body.kakapo_id });
-  if (userQueryErr) {
-    return sendError(res, new GenericError());
+  let user;
+  try {
+    user = await db.models.user.findOne({
+      where: { kakapo_id: req.body.kakapo_id },
+    });
+  } catch (error) {
+    return sendError(
+      res,
+      new GenericError("Failed to retrieve user from the database.")
+    );
   }
 
-  if (!userQueryResult) {
+  if (!user) {
     return sendError(res, new UserNotFoundError());
   }
 
-  const passwordEqual = await checkHash(userQueryResult.password, req.body.password);
+  const passwordEqual = await checkHash(user.password, req.body.password);
   if (!passwordEqual) {
     return sendError(res, new WrongCredentialsError());
   }
 
-  const [tokenError, token] = signToken(userQueryResult.public_id);
+  const [tokenError, token] = signToken(user.public_id);
   if (tokenError) {
     return sendError(res, new TokenError());
   }
@@ -59,7 +79,7 @@ const signUp = async (req, res) => {
     return sendError(res, createError);
   }
 
-  return res.send({ message: "Account created successfully." });
+  return res.send({ success: true });
 };
 
 const getAuthRoutes = () => {

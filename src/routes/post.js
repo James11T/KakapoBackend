@@ -13,16 +13,23 @@ import { checkRequiredParameters } from "../utils/validations.js";
 import { deletePost } from "../utils/database.js";
 import { isAuthenticated } from "../middleware/auth.middleware.js";
 import { paramPostMiddleware } from "../middleware/data.middleware.js";
+import { db } from "../database.js";
 
 const getPost = async (req, res) => {
-  return res.send({ post: global.db.table("post").filter(req.post, 0) });
+  return res.send({ post: req.post });
 };
 
 const createPost = async (req, res) => {
   let { content = "" } = req.body;
-  const [hasRequiredParameters, missingParameters] = checkRequiredParameters(req.files, ["media"]);
+  const [hasRequiredParameters, missingParameters] = checkRequiredParameters(
+    req.files,
+    ["media"]
+  );
   if (!hasRequiredParameters) {
-    return sendError(res, new MissingParametersError({ missingParameters: missingParameters }));
+    return sendError(
+      res,
+      new MissingParametersError({ missingParameters: missingParameters })
+    );
   }
 
   const publicId = generatePublicId(16);
@@ -32,7 +39,7 @@ const createPost = async (req, res) => {
 
   req.files.media.mv(`.${fn}`);
 
-  let newPost = {
+  let newPostData = {
     author: req.authenticatedUser.id,
     media: fn,
     content: content,
@@ -40,12 +47,12 @@ const createPost = async (req, res) => {
     public_id: publicId,
   };
 
-  const [createPostError, createPostResult] = await global.db.table("post").new(newPost);
-  if (createPostError) {
-    return sendError(res, new GenericError());
+  try {
+    const newPost = await db.models.post.create(newPostData);
+    return res.send({ success: true, post: newPost });
+  } catch (error) {
+    return sendError(res, new GenericError("Failed to create new post."));
   }
-
-  return res.send({ success: true, location: newPost.public_id });
 };
 
 const deletePostEndpoint = async (req, res) => {
@@ -53,9 +60,9 @@ const deletePostEndpoint = async (req, res) => {
     return sendError(res, new NotPostOwnerError());
   }
 
-  const [deletePostError] = await deletePost(req.post);
-  if (deletePostError) {
-    return sendError(res, new GenericError());
+  const deletePostSuccess = await deletePost(req.post);
+  if (!deletePostSuccess) {
+    return sendError(res, new GenericError("Failed to delete post."));
   }
 
   return res.send({ success: true });
@@ -66,26 +73,36 @@ const editPost = async (req, res) => {
     return sendError(res, new NotPostOwnerError());
   }
 
-  const [hasRequiredParameters, missingParameters] = checkRequiredParameters(req.body, ["content"]);
+  const [hasRequiredParameters, missingParameters] = checkRequiredParameters(
+    req.body,
+    ["content"]
+  );
   if (!hasRequiredParameters) {
-    return sendError(res, new MissingParametersError({ missingParameters: missingParameters }));
+    return sendError(
+      res,
+      new MissingParametersError({ missingParameters: missingParameters })
+    );
   }
 
   const { content } = req.body;
 
   const trimmedContent = content.trim();
   if (trimmedContent.length === 0 || trimmedContent.length > 256) {
-    return sendError(res, new BadParametersError({ badParameters: ["content"] }));
+    return sendError(
+      res,
+      new BadParametersError({ badParameters: ["content"] })
+    );
   }
 
-  const [editPostError, editPostResult] = await global.db
-    .table("post")
-    .edit({ public_id: req.post.public_id }, { edited: true, content: trimmedContent });
-  if (editPostError) {
-    return sendError(res, new GenericError());
+  try {
+    const editedPost = await db.models.post.update(
+      { edited: true, content: trimmedContent },
+      { where: { public_id: req.post.public_id } }
+    );
+    return res.send({ success: true, post: editedPost });
+  } catch (error) {
+    return sendError(res, new GenericError("Failed to edit post."));
   }
-
-  return res.send({ success: true });
 };
 
 const repostPost = async (req, res) => {};
@@ -95,10 +112,20 @@ const getPostRoutes = () => {
 
   router.get("/:post_id", paramPostMiddleware, getPost);
   router.post("/", isAuthenticated, createPost);
-  router.delete("/:post_id", isAuthenticated, paramPostMiddleware, deletePostEndpoint);
+  router.delete(
+    "/:post_id",
+    isAuthenticated,
+    paramPostMiddleware,
+    deletePostEndpoint
+  );
   router.put("/:post_id", isAuthenticated, paramPostMiddleware, editPost);
 
-  router.post("/repost/:post_id", isAuthenticated, paramPostMiddleware, repostPost);
+  router.post(
+    "/repost/:post_id",
+    isAuthenticated,
+    paramPostMiddleware,
+    repostPost
+  );
 
   router.use("/like", getPostLikeRoutes());
   router.use("/comment", getPostCommentRoutes());
