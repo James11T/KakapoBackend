@@ -14,6 +14,7 @@ import { signToken } from "../auth/tokens.js";
 import { createNewUser } from "../data/datafunctions.js";
 import { checkRequiredParameters } from "../utils/validations.js";
 import { db } from "../database.js";
+import User from "../models/user.model.js";
 
 const signIn = async (req, res) => {
   /**
@@ -41,7 +42,7 @@ const signIn = async (req, res) => {
 
   let user;
   try {
-    user = await db.models.user.findOne({
+    user = await User.findOne({
       where: { kakapo_id: req.body.kakapo_id },
     });
   } catch (error) {
@@ -65,7 +66,8 @@ const signIn = async (req, res) => {
     return sendError(res, new TokenError());
   }
 
-  return res.send({ token: token });
+  // ADD FILTER
+  return res.send({ token: token, user: user });
 };
 
 const signUp = async (req, res) => {

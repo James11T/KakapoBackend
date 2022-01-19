@@ -12,6 +12,8 @@ import { getUserFriendRoutes } from "./user/friend.js";
 import { paramUserMiddleware } from "../middleware/data.middleware.js";
 import { clamp } from "../utils/funcs.js";
 import { db } from "../database.js";
+import User from "../models/user.model.js";
+import Post from "../models/post.model.js";
 
 const getMe = async (req, res) => {
   // ADD FILTER
@@ -33,7 +35,7 @@ const kakapoIDTakenCheck = async (req, res) => {
   const { kakapo_id } = req.params;
 
   try {
-    const user = await db.models.user.findOne({
+    const user = await User.findOne({
       where: { kakapo_id: kakapo_id },
     });
     return res.send({ taken: !!user });
@@ -44,7 +46,7 @@ const kakapoIDTakenCheck = async (req, res) => {
 
 const getUserCount = async (req, res) => {
   try {
-    const count = await db.models.user.count();
+    const count = await User.count();
     return res.send({ count: count });
   } catch (error) {
     return sendError(res, new GenericError("Failed to count users."));
@@ -75,7 +77,7 @@ const getUserPosts = async (req, res) => {
   from = Math.max(from, 0); // Minimum 0
 
   try {
-    const results = await db.models.post.findAll({
+    const results = await Post.findAll({
       limit: count,
       offset: from,
       where: { author: req.user.id },

@@ -15,6 +15,8 @@ import {
   paramPostMiddleware,
 } from "../../middleware/data.middleware.js";
 import { db } from "../../database.js";
+import Comment from "../../models/comment.model.js";
+import User from "../../models/user.model.js";
 
 const getComment = async (req, res) => {
   return res.send({
@@ -25,7 +27,7 @@ const getComment = async (req, res) => {
 
 const getCommentCount = async (req, res) => {
   try {
-    const count = await db.models.comment.count({
+    const count = await Comment.count({
       where: {
         post: req.post.id,
       },
@@ -66,7 +68,7 @@ const addPostComment = async (req, res) => {
   };
 
   try {
-    const newComment = await db.models.comment.create(newCommentData);
+    const newComment = await Comment.create(newCommentData);
 
     return res.send({
       success: true,
@@ -88,7 +90,7 @@ const deletePostComment = async (req, res) => {
   }
 
   try {
-    await db.models.user.destroy({ where: { id: req.comment.id } });
+    await User.destroy({ where: { id: req.comment.id } });
     return res.send({ success: true });
   } catch (error) {
     return sendError(res, new GenericError("Failed to delete comment."));
@@ -121,7 +123,7 @@ const editPostComment = async (req, res) => {
   }
 
   try {
-    const newComment = await db.models.comment.update(
+    const newComment = await Comment.update(
       { content: trimmedContent },
       {
         where: {
@@ -154,7 +156,7 @@ const getCommentsInRange = async (req, res) => {
   from = Math.max(from, 0); // Minimum 0
 
   try {
-    const results = await db.models.comment.findAll({
+    const results = await Comment.findAll({
       limit: count,
       offset: from,
       where: {

@@ -11,12 +11,14 @@ import {
 } from "../../errors/apierrors.js";
 import { isAuthenticated } from "../../middleware/auth.middleware.js";
 import { paramUserMiddleware } from "../../middleware/data.middleware.js";
+import FriendRequest from "../../models/friendrequest.model.js";
+import Friendship from "../../models/friendship.model.js";
 import { usersAreFriends, orderedFriendQuery } from "../../utils/database.js";
 import { getEpoch } from "../../utils/funcs.js";
 
 const getFriendCount = async (req, res) => {
   try {
-    const count = await db.models.friendship.count({
+    const count = await Friendship.count({
       where: { [Op.or]: [{ user1: req.user }, { user2: req.user }] },
     });
     return res.send({ count: count, user: req.user });
@@ -45,7 +47,7 @@ const sendFriendRequest = async (req, res) => {
 
   // Check there isnt an existing friend request
   try {
-    const friendRequest = await db.models.friend_request.findOne({
+    const friendRequest = await FriendRequest.findOne({
       where: { from: req.authenticatedUser.id, to: req.user.id },
     });
     if (friendRequest) {
@@ -65,7 +67,7 @@ const sendFriendRequest = async (req, res) => {
   };
 
   try {
-    await db.models.friend_request.create(newFriendRequestData);
+    await FriendRequest.create(newFriendRequestData);
     return res.send({ success: true });
   } catch (error) {
     return sendError(res, new GenericError("Failed to create friend request."));
@@ -77,7 +79,7 @@ const acceptFriendRequest = async (req, res) => {
   let friendRequestQuery = { from: req.user.id, to: req.authenticatedUser.id };
 
   try {
-    const friendRequest = await db.models.friend_request.findOne({
+    const friendRequest = await FriendRequest.findOne({
       where: friendRequestQuery,
     });
     if (!friendRequest) {
@@ -113,14 +115,14 @@ const acceptFriendRequest = async (req, res) => {
 
   // Delete friend request
   try {
-    await db.models.friend_request.destroy({ where: friendRequestQuery });
+    await FriendRequest.destroy({ where: friendRequestQuery });
   } catch (err) {
     return sendError(res, new GenericError("Failed to delete friend request."));
   }
 
   // Create friendship
   try {
-    await db.models.friendship.create(newFriendshipData);
+    await Friendship.create(newFriendshipData);
   } catch (error) {
     return sendError(res, new GenericError("Failed to create friendship."));
   }
@@ -130,7 +132,7 @@ const acceptFriendRequest = async (req, res) => {
 
 const getAllFriendRequests = async (req, res) => {
   try {
-    const results = await db.models.friend_request.findAll({
+    const results = await FriendRequest.findAll({
       where: { to: req.authenticatedUser.id },
     });
     // ADD FILTER

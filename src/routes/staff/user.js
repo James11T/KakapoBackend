@@ -15,6 +15,9 @@ import {
 } from "../../errors/apierrors.js";
 import { isKakapoIDInUse } from "../../utils/database.js";
 import { db } from "../../database.js";
+import Post from "../../models/post.model.js";
+import Friendship from "../../models/friendship.model.js";
+import User from "../../models/user.model.js";
 
 /**
  * Get a user from the database with added info like post, comment and friend count
@@ -24,13 +27,13 @@ const getFullUserData = async (req, res) => {
 
   try {
     const userId = req.user.id;
-    postCount = await db.models.post.count({ where: { author: userId } });
+    postCount = await Post.count({ where: { author: userId } });
 
-    friendCount = await db.models.friendship.count({
+    friendCount = await Friendship.count({
       where: { [Op.or]: [{ user1: userId }, { user2: userId }] },
     });
 
-    commentCount = await db.models.comment.count({ where: { author: userId } });
+    commentCount = await Comment.count({ where: { author: userId } });
   } catch (error) {
     return sendError(
       res,
@@ -72,7 +75,7 @@ const getUsers = async (req, res) => {
   from = Math.max(from, 0); // Minimum 0
 
   try {
-    const results = await db.models.user.findAll({
+    const results = await User.findAll({
       limit: count,
       offset: from,
     });
@@ -91,7 +94,7 @@ const getAllUsers = async (req, res) => {
    */
 
   try {
-    const result = await db.models.user.findAll();
+    const result = await User.findAll();
     // ADD FILTER
     return res.send({
       users: result,
@@ -110,7 +113,7 @@ const setDataDisplayName = async (req, res) => {
   }
 
   try {
-    const newUser = await db.models.user.update(
+    const newUser = await User.update(
       { display_name: trimmedDispayName },
       { where: { id: req.user.id } }
     );
@@ -137,7 +140,7 @@ const setDataKakapoID = async (req, res) => {
   }
 
   try {
-    const newUser = await db.models.user.update(
+    const newUser = await User.update(
       { kakapo_id: trimmedKakapoID },
       { where: { id: req.user.id } }
     );
@@ -155,7 +158,7 @@ const setDataRank = async (req, res) => {
   }
 
   try {
-    const newUser = await db.models.user.update(
+    const newUser = await User.update(
       { rank: value },
       { where: { id: req.user.id } }
     );
@@ -179,7 +182,7 @@ const setDataBadge = async (req, res) => {
   }
 
   try {
-    const newUser = await db.models.user.update(
+    const newUser = await User.update(
       { badge: value },
       { where: { id: req.user.id } }
     );

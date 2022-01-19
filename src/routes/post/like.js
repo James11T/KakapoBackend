@@ -9,10 +9,11 @@ import { getEpoch } from "../../utils/funcs.js";
 import { isAuthenticated } from "../../middleware/auth.middleware.js";
 import { paramPostMiddleware } from "../../middleware/data.middleware.js";
 import { db } from "../../database.js";
+import Like from "../../models/like.model.js";
 
 const getLikeCount = async (req, res) => {
   try {
-    const count = await db.models.like.count({ where: { post: req.post.id } });
+    const count = await Like.count({ where: { post: req.post.id } });
     return res.send({ count: count });
   } catch (error) {
     return sendError(res, new GenericError("Failed to count likes."));
@@ -21,7 +22,7 @@ const getLikeCount = async (req, res) => {
 
 const likePost = async (req, res) => {
   try {
-    const likeResult = await db.models.like.findOne({
+    const likeResult = await Like.findOne({
       where: {
         post: req.post.id,
         liker: req.authenticatedUser.id,
@@ -42,7 +43,7 @@ const likePost = async (req, res) => {
   };
 
   try {
-    await db.models.like.create(newLikeData);
+    await Like.create(newLikeData);
     return res.send({ success: true });
   } catch (error) {
     return sendError(res, new GenericError("Failed to create new like."));
@@ -51,7 +52,7 @@ const likePost = async (req, res) => {
 
 const unlikePost = async (req, res) => {
   try {
-    const getLike = await db.models.like.findOne({
+    const getLike = await Like.findOne({
       where: { post: req.post.id, liker: req.authenticatedUser.id },
     });
     if (!getLike) {
@@ -62,7 +63,7 @@ const unlikePost = async (req, res) => {
   }
 
   try {
-    await db.models.like.destroy({
+    await Like.destroy({
       where: { post: req.post.id, liker: req.authenticatedUser.id },
     });
     return res.send({ success: true });

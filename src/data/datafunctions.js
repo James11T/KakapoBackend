@@ -16,6 +16,7 @@ import {
 } from "../utils/validations.js";
 import { isKakapoIDInUse } from "../utils/database.js";
 import { hashPassword, toPasswordHashString } from "../auth/passwords.js";
+import User from "../models/user.model.js";
 
 /**
  * Create a new user in the database if all the content checks are valid
@@ -87,7 +88,7 @@ const createNewUser = async (data) => {
   };
 
   try {
-    const newUser = await db.models.user.create(newUserData);
+    const newUser = await User.create(newUserData);
     return [null, newUser];
   } catch (error) {
     return [error, null];

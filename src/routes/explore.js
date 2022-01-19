@@ -8,6 +8,7 @@ import {
   GenericError,
 } from "../errors/apierrors.js";
 import { db } from "../database.js";
+import User from "../models/user.model.js";
 
 const explorePeople = async (req, res) => {
   const [hasRequiredParameters, missingParameters] = checkRequiredParameters(
@@ -24,7 +25,7 @@ const explorePeople = async (req, res) => {
   const { search_term } = req.params;
 
   try {
-    const exploreResult = await db.models.user.findAll({
+    const exploreResult = await User.findAll({
       where: {
         [Op.or]: [
           { kakapo_id: { [Op.substring]: search_term } },

@@ -1,6 +1,9 @@
 import fs from "fs";
 import { db } from "../database.js";
 import { GenericError } from "../errors/apierrors.js";
+import Friendship from "../models/friendship.model.js";
+import Post from "../models/post.model.js";
+import User from "../models/user.model.js";
 
 /**
  *
@@ -29,7 +32,7 @@ const usersAreFriends = async (user1, user2) => {
   let friendshipQuery = orderedFriendQuery(user1, user2);
 
   try {
-    const friendship = await db.models.friendship.findOne({
+    const friendship = await Friendship.findOne({
       where: friendshipQuery,
     });
     return [null, !!friendship];
@@ -47,7 +50,7 @@ const usersAreFriends = async (user1, user2) => {
 const deletePost = async (post, deleteFile = true) => {
   // SWITCH TO RETURN SUCCESS BOOL
   try {
-    await db.models.post.destroy({ where: { id: post.id } });
+    await Post.destroy({ where: { id: post.id } });
     if (deleteFile) {
       await fs.promises.unlink(`.${post.media}`);
     }
@@ -59,7 +62,7 @@ const deletePost = async (post, deleteFile = true) => {
 
 const isKakapoIDInUse = async (kakapo_id) => {
   try {
-    const user = await db.models.user.findOne({
+    const user = await User.findOne({
       attributes: ["kakapo_id"],
       where: { kakapo_id: kakapo_id },
     });

@@ -14,6 +14,7 @@ import { deletePost } from "../utils/database.js";
 import { isAuthenticated } from "../middleware/auth.middleware.js";
 import { paramPostMiddleware } from "../middleware/data.middleware.js";
 import { db } from "../database.js";
+import Post from "../models/post.model.js";
 
 const getPost = async (req, res) => {
   return res.send({ post: req.post });
@@ -48,7 +49,7 @@ const createPost = async (req, res) => {
   };
 
   try {
-    const newPost = await db.models.post.create(newPostData);
+    const newPost = await Post.create(newPostData);
     return res.send({ success: true, post: newPost });
   } catch (error) {
     return sendError(res, new GenericError("Failed to create new post."));
@@ -95,7 +96,7 @@ const editPost = async (req, res) => {
   }
 
   try {
-    const editedPost = await db.models.post.update(
+    const editedPost = await Post.update(
       { edited: true, content: trimmedContent },
       { where: { public_id: req.post.public_id } }
     );

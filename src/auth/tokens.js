@@ -3,6 +3,7 @@ import { getEpoch } from "../utils/funcs.js";
 import { db } from "../database.js";
 
 import { BadTokenError, NotAuthenticatedError } from "../errors/apierrors.js";
+import User from "../models/user.model.js";
 
 /**
  * Generate a token for a user
@@ -51,7 +52,7 @@ const decodeToken = (token) => {
  */
 const tokenToUser = async (token) => {
   try {
-    const user = await db.models.user.findOne({
+    const user = await User.findOne({
       where: {
         public_id: token.public_id,
       },
