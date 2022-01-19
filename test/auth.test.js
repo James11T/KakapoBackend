@@ -3,13 +3,12 @@ import { signIn, signUp, apiFetch } from "./testing.util.js";
 import assert from "assert";
 
 describe("Signing up", () => {
-  it("sign up should return success", async () => {
+  it("return success when signing up with valid values", async () => {
     const signUpData = await signUp();
-    //assert.equal(signUpData.success, true);
-    assert.ok(true);
+    assert.equal(signUpData.success, true);
   });
 
-  it("sign up while authenticated should return error 405", async () => {
+  it("should return error 405 when signing up while authenticated ", async () => {
     const signInData = await signIn();
     const signUpData = await signUp({
       token: signInData.token,
@@ -19,69 +18,69 @@ describe("Signing up", () => {
   });
 
   describe("Invalid inputs", () => {
-    it("sign up with existing kakapo id should return error 114", async () => {
+    it("should return error 114 when signing up with existing kakapo id ", async () => {
       const signUpData = await signUp();
       assert.equal(signUpData.error, 114);
     });
 
-    it("sign up with invalid kakapo id should return error 101", async () => {
+    it("should return error 101 when signing up with invalid kakapo id ", async () => {
       const signUpData = await signUp({ kakapo_id: "invalid kakapo" });
       assert.equal(signUpData.error, 101);
     });
 
-    it("sign up with invalid kakapo id should return invalid parameter as kakapo_id", async () => {
+    it("should return invalid parameter as kakapo_id when signing up with invalid kakapo id ", async () => {
       const signUpData = await signUp({ kakapo_id: "invalid kakapo" });
       assert.equal(signUpData.badParameters[0], "kakapo_id");
     });
 
-    it("sign up with invalid password should return error 101", async () => {
+    it("should return error 101 when signing up with invalid password ", async () => {
       const signUpData = await signUp({ password: "small" });
       assert.equal(signUpData.error, 101);
     });
 
-    it("sign up with invalid password should return invalid parameter as password", async () => {
+    it("should return invalid parameter as password when signing up with invalid password ", async () => {
       const signUpData = await signUp({ password: "small" });
       assert.equal(signUpData.badParameters[0], "password");
     });
 
-    it("sign up with invalid email should return error 101", async () => {
+    it("should return error 101 when signing up with invalid email", async () => {
       const signUpData = await signUp({ email: "bad email" });
       assert.equal(signUpData.error, 101);
     });
 
-    it("sign up with invalid email should return invalid parameter as email", async () => {
+    it("should return invalid parameter as email when signing up with invalid email ", async () => {
       const signUpData = await signUp({ email: "bad email" });
       assert.equal(signUpData.badParameters[0], "email");
     });
   });
 
   describe("Missing inputs", () => {
-    it("sign up with missing kakapo id should return error 100", async () => {
+    it("should return error 100 when signing up with missing kakapo id ", async () => {
       const signUpData = await signUp({ kakapo_id: null });
       assert.equal(signUpData.error, 100);
     });
 
-    it("sign up with missing kakapo_id should return missing parameter as kakapo_id", async () => {
+    it("should return missing parameter as kakapo_id when signing up with missing kakapo_id ", async () => {
       const signUpData = await signUp({ kakapo_id: null });
       assert.equal(signUpData.missingParameters[0], "kakapo_id");
     });
 
-    it("sign up with missing password should return error 100", async () => {
+    it("should return error 100 when signing up with missing password", async () => {
       const signUpData = await signUp({ password: null });
       assert.equal(signUpData.error, 100);
     });
 
-    it("sign up with missing password should return missing parameter as password", async () => {
+    it("should return missing parameter as password when signing up with missing password", async () => {
       const signUpData = await signUp({ password: null });
       assert.equal(signUpData.missingParameters[0], "password");
     });
 
-    it("sign up with missing email should return error 100", async () => {
+    it("should return error 100 when signing up with missing email ", async () => {
       const signUpData = await signUp({ email: null });
       assert.equal(signUpData.error, 100);
     });
 
-    it("sign up with missing email should return missing parameter as email", async () => {
+    it("should return missing parameter as email when signing up with missing email ", async () => {
       const signUpData = await signUp({ email: null });
       assert.equal(signUpData.missingParameters[0], "email");
     });
@@ -89,59 +88,143 @@ describe("Signing up", () => {
 });
 
 describe("Signing in", () => {
-  it("sign in should return a token", async () => {
+  it("should return a token when signing in with correct credentials", async () => {
     const signInData = await signIn();
     assert.ok(signInData.token);
   });
 
-  it("token authentication should return user", async () => {
-    const signInData = await signIn();
-    const meData = await apiFetch("user/me", { token: signInData.token });
-    assert.ok(meData.user.id);
-  });
-
-  it("invalid token should be ignored, returning error 401", async () => {
+  it("return error 401 when using malformed tokem, by ignoring the token", async () => {
     const meData = await apiFetch("user/me", { token: "Bad token" });
     assert.equal(meData.error, 401);
   });
 
-  it("sign in when already signed in should return error 405", async () => {
+  it("should return error 405 when signing in while already signed in", async () => {
     const signInData = await signIn();
     const signInData2 = await signIn({ token: signInData.token });
     assert.equal(signInData2.error, 405);
   });
 
   describe("Invalid inputs", () => {
-    it("sign in with wrong password should return error 400", async () => {
+    it("should return error 400 when signing in with wrong password ", async () => {
       const signInData = await signIn({ password: "wrongpassword" });
       assert.equal(signInData.error, 400);
     });
 
-    it("sign in with wrong kakapo id should return error 104", async () => {
+    it("should return error 104 when signing in with wrong kakapo id ", async () => {
       const signInData = await signIn({ kakapo_id: "doesnt exist" });
       assert.equal(signInData.error, 104);
     });
   });
 
   describe("Missing inputs", () => {
-    it("sign in with missing kakapo_id should return error 100", async () => {
+    it("should return error 100 when signing in with missing kakapo_id", async () => {
       const signInData = await signIn({ kakapo_id: null });
       assert.equal(signInData.error, 100);
     });
 
-    it("sign in with missing kakapo_id should return missing parameter as kakapo_id", async () => {
+    it("should return missing parameter as kakapo_id when signing in with missing kakapo_id", async () => {
       const signInData = await signIn({ kakapo_id: null });
       assert.equal(signInData.missingParameters[0], "kakapo_id");
     });
 
-    it("sign in with missing password should return error 100", async () => {
+    it("should return error 100 when signing in with missing password", async () => {
       const signInData = await signIn({ password: null });
       assert.equal(signInData.error, 100);
     });
 
-    it("sign in with missing password should return missing parameter as password", async () => {
+    it("should return missing parameter as password when signing in with missing password", async () => {
       const signInData = await signIn({ password: null });
       assert.equal(signInData.missingParameters[0], "password");
+    });
+  });
+});
+
+await signUp({
+  kakapo_id: "userTest1",
+  password: "usertestpassword",
+});
+
+await signUp({
+  kakapo_id: "userTest2",
+  password: "usertestpassword",
+});
+
+const userTest1 = await signIn({
+  kakapo_id: "userTest1",
+  password: "usertestpassword",
+});
+const token1 = userTest1.token;
+const testUser1 = userTest1.user;
+
+const userTest2 = await signIn({
+  kakapo_id: "userTest2",
+  password: "usertestpassword",
+});
+const token2 = userTest2.token;
+const testUser2 = userTest2.user;
+
+describe("User endpoints", () => {
+  describe("me", () => {
+    it("should return the currently authenticated user when calling me", async () => {
+      const meData = await apiFetch("user/me", { token: token1 });
+      assert.ok(!meData.error);
+    });
+
+    it("should return error 401 when calling me while unauthenticated", async () => {
+      const meData = await apiFetch("user/me");
+      assert.equal(meData.error, 401);
+    });
+  });
+
+  describe("idtaken", () => {
+    it("should return true when the kakapo id is avaialble", async () => {
+      const idTakenData = await apiFetch("user/idtaken/testing_user");
+      assert.equal(idTakenData.taken, true);
+    });
+
+    it("should return false when the kakapo id is not taken", async () => {
+      const idTakenData = await apiFetch("user/idtaken/nottaken");
+      assert.strictEqual(idTakenData.taken, false);
+    });
+  });
+
+  describe("count", () => {
+    it("should return the number of registered users", async () => {
+      const countData = await apiFetch("user/count");
+      assert.ok(!countData.error);
+      assert.equal(typeof countData.count, "number");
+      assert.ok(countData.count >= 0);
+    });
+  });
+
+  describe("getting a user", () => {
+    it("should return the requested user object", async () => {
+      const userData = await apiFetch(`user/${userTest1.kakapo_id}`);
+      assert.equal(userData.kakapo_id, userTest1.kakapo_id);
+    });
+
+    it("should return error 104 when getting a user that does not exist", async () => {
+      const userData = await apiFetch("user/idontexist");
+      assert.equal(userData.error, 104);
+    });
+  });
+
+  describe("friends", () => {
+    it("should return success after sending a friend request", async () => {
+      const friendRequestData = await apiFetch(
+        `user/friend/request/send/${testUser2.kakapo_id}`,
+        { token: token1, method: "POST" }
+      );
+      assert.equal(friendRequestData.success, true);
+    });
+
+    it("should return a list of friend requests with 1 entry", async () => {
+      const friendRequestData = await apiFetch("user/friend/request/all", {
+        token: token2,
+      });
+
+      console.log(friendRequestData);
+      assert.ok(friendRequestData.friend_requests.length === 1);
     });
   });
 });

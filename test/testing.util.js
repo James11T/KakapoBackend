@@ -1,7 +1,7 @@
 import fetch from "node-fetch";
 const API_URL = "http://localhost:5000/api/v1/";
 
-const apiFetch = async (endpoint, config, body) => {
+const apiFetch = async (endpoint, config = {}, body) => {
   const { token, method = "GET" } = config;
 
   let headers = {
@@ -22,7 +22,13 @@ const apiFetch = async (endpoint, config, body) => {
     fetchConfig.body = JSON.stringify(body);
   }
 
-  const response = await fetch(`${API_URL}${endpoint}`, fetchConfig);
+  const url = `${API_URL}${endpoint}`;
+
+  const response = await fetch(url, fetchConfig);
+
+  if (!response.ok) {
+    console.log(url);
+  }
 
   return response.json();
 };
