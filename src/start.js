@@ -26,7 +26,7 @@ const startApp = async (apiBase, port = process.env.API_PORT) => {
     return false;
   }
 
-  await db.sync({ alter: true });
+  await db.sync({ force: true });
 
   app.use(express.json());
   app.use(
