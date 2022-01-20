@@ -1,5 +1,5 @@
 import fs from "fs";
-import { GenericError } from "../errors/apierrors.js";
+import { GenericError, KakapoIDReservedError } from "../errors/apierrors.js";
 import Friendship from "../models/friendship.model.js";
 import Post from "../models/post.model.js";
 import User from "../models/user.model.js";
@@ -59,7 +59,12 @@ const deletePost = async (post, deleteFile = true) => {
   }
 };
 
+const reservedIDs = ["me", "admin", "idtaken", "count"];
+
 const isKakapoIDInUse = async (kakapo_id) => {
+  if (reservedIDs.includes(kakapo_id)) {
+    return [new KakapoIDReservedError(), null];
+  }
   try {
     const user = await User.findOne({
       attributes: ["kakapo_id"],
