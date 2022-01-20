@@ -2,10 +2,10 @@ import fetch from "node-fetch";
 const API_URL = "http://localhost:5000/api/v1/";
 
 const apiFetch = async (endpoint, config = {}, body) => {
-  const { token, method = "GET" } = config;
+  const { token, method = "GET", contentType = "application/json" } = config;
 
   let headers = {
-    "Content-Type": "application/json",
+    "Content-Type": contentType,
     Accept: "application/json",
   };
 
