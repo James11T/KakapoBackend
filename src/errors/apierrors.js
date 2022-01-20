@@ -26,6 +26,17 @@ class APIError extends Error {
   }
 }
 
+class NotYetImplementedError extends APIError {
+  constructor(errorData) {
+    super(
+      "The requested feature has not yet been fully implemented.",
+      "000",
+      errorData
+    );
+    this.name = NotYetImplementedError;
+  }
+}
+
 class MissingParametersError extends APIError {
   constructor(errorData) {
     super("Missing parameters from request.", "100", errorData);
@@ -239,6 +250,7 @@ const sendError = (res, error) => {
 
 export {
   sendError,
+  NotYetImplementedError,
   GenericError,
   MissingParametersError,
   QueryFailedError,
