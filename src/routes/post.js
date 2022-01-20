@@ -13,7 +13,10 @@ import { generatePublicId, getEpoch } from "../utils/funcs.js";
 import { checkRequiredParameters } from "../utils/validations.js";
 import { deletePost } from "../utils/database.js";
 import { isAuthenticated } from "../middleware/auth.middleware.js";
-import { paramPostMiddleware, paramUserMiddleware } from "../middleware/data.middleware.js";
+import {
+  paramPostMiddleware,
+  paramUserMiddleware,
+} from "../middleware/data.middleware.js";
 import Post from "../models/post.model.js";
 import User from "../models/user.model.js";
 
@@ -160,8 +163,8 @@ const getPostRoutes = () => {
     paramPostMiddleware,
     deletePostEndpoint
   );
+  router.get("/by/:kakapo_id", paramUserMiddleware, getUserPosts);
   router.put("/:post_id", isAuthenticated, paramPostMiddleware, editPost);
-  router.get("/posts/:kakapo_id", paramUserMiddleware, getUserPosts);
 
   router.post(
     "/repost/:post_id",
