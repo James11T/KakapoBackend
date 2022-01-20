@@ -13,7 +13,7 @@ import { generatePublicId, getEpoch } from "../utils/funcs.js";
 import { checkRequiredParameters } from "../utils/validations.js";
 import { deletePost } from "../utils/database.js";
 import { isAuthenticated } from "../middleware/auth.middleware.js";
-import { paramPostMiddleware } from "../middleware/data.middleware.js";
+import { paramPostMiddleware, paramUserMiddleware } from "../middleware/data.middleware.js";
 import Post from "../models/post.model.js";
 import User from "../models/user.model.js";
 
@@ -115,6 +115,40 @@ const repostPost = async (req, res) => {
   return sendError(res, new NotYetImplementedError());
 };
 
+const getUserPosts = async (req, res) => {
+  let { from = 0, count = 20 } = req.query;
+
+  try {
+    from = Number(from);
+  } catch (castingError) {
+    return sendError(res, new BadParametersError({ badParameters: ["from"] }));
+  }
+
+  try {
+    count = Number(count);
+  } catch (castingError) {
+    return sendError(res, new BadParametersError({ badParameters: ["count"] }));
+  }
+
+  count = clamp(count, 1, 40);
+  from = Math.max(from, 0); // Minimum 0
+
+  try {
+    const results = await Post.findAll({
+      limit: count,
+      offset: from,
+      where: { author_id: req.user.id },
+      include: [{ model: User, as: "author", foreignKey: "author_id" }],
+    });
+    return res.send({
+      // ADD FILTER
+      posts: results,
+    });
+  } catch (error) {
+    return sendError(res, new GenericError("Failed to retrieve posts."));
+  }
+};
+
 const getPostRoutes = () => {
   const router = express.Router();
 
@@ -127,6 +161,7 @@ const getPostRoutes = () => {
     deletePostEndpoint
   );
   router.put("/:post_id", isAuthenticated, paramPostMiddleware, editPost);
+  router.get("/posts/:kakapo_id", paramUserMiddleware, getUserPosts);
 
   router.post(
     "/repost/:post_id",

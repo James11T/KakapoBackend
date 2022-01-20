@@ -57,40 +57,6 @@ const getUser = async (req, res) => {
   return res.send({ user: req.user });
 };
 
-const getUserPosts = async (req, res) => {
-  let { from = 0, count = 20 } = req.query;
-
-  try {
-    from = Number(from);
-  } catch (castingError) {
-    return sendError(res, new BadParametersError({ badParameters: ["from"] }));
-  }
-
-  try {
-    count = Number(count);
-  } catch (castingError) {
-    return sendError(res, new BadParametersError({ badParameters: ["count"] }));
-  }
-
-  count = clamp(count, 1, 40);
-  from = Math.max(from, 0); // Minimum 0
-
-  try {
-    const results = await Post.findAll({
-      limit: count,
-      offset: from,
-      where: { author_id: req.user.id },
-      include: [{ model: User, as: "author", foreignKey: "author_id" }],
-    });
-    return res.send({
-      // ADD FILTER
-      posts: results,
-    });
-  } catch (error) {
-    return sendError(res, new GenericError("Failed to retrieve posts."));
-  }
-};
-
 const getUserRoutes = () => {
   const router = express.Router();
 
@@ -98,7 +64,6 @@ const getUserRoutes = () => {
   router.get("/idtaken/:kakapo_id", kakapoIDTakenCheck);
   router.get("/count", getUserCount);
   router.get("/:kakapo_id", paramUserMiddleware, getUser);
-  router.get("/posts/:kakapo_id", paramUserMiddleware, getUserPosts);
 
   router.use("/friend", getUserFriendRoutes());
 
