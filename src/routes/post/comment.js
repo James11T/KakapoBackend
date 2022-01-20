@@ -1,9 +1,9 @@
 import express from "express";
+
 import {
   sendError,
   GenericError,
   MissingParametersError,
-  CommentNotFoundError,
   BadParametersError,
   NotCommentOwnerError,
 } from "../../errors/apierrors.js";
@@ -14,9 +14,9 @@ import {
   paramCommentMiddleware,
   paramPostMiddleware,
 } from "../../middleware/data.middleware.js";
-import { db } from "../../database.js";
 import Comment from "../../models/comment.model.js";
 import User from "../../models/user.model.js";
+import Post from "../../models/post.model.js";
 
 const getComment = async (req, res) => {
   return res.send({
@@ -29,7 +29,7 @@ const getCommentCount = async (req, res) => {
   try {
     const count = await Comment.count({
       where: {
-        post: req.post.id,
+        post_id: req.post.id,
       },
     });
     return res.send({ count: count });
@@ -60,24 +60,20 @@ const addPostComment = async (req, res) => {
   }
 
   const newCommentData = {
-    post: req.post.id,
+    post_id: req.post.id,
     content: trimmedContent,
     commented_at: getEpoch(),
-    author: req.authenticatedUser.id,
+    author_id: req.authenticatedUser.id,
     public_id: generatePublicId(),
   };
 
   try {
     const newComment = await Comment.create(newCommentData);
 
+    // ADD FILTER
     return res.send({
       success: true,
-      comment: {
-        id: newComment.public_id,
-        content: newComment.content,
-        commented_at: newComment.commented_at,
-        post: req.post.public_id,
-      },
+      comment: newComment,
     });
   } catch (error) {
     return sendError(res, new GenericError("Failed to create new comment."));
@@ -129,6 +125,10 @@ const editPostComment = async (req, res) => {
         where: {
           id: req.comment.id,
         },
+        include: [
+          { model: Post, as: "post", foreignKey: "post_id" },
+          { model: User, as: "author", foreignKey: "author_id" },
+        ],
       }
     );
     return res.send({ success: true, content: newComment.content });
@@ -160,8 +160,12 @@ const getCommentsInRange = async (req, res) => {
       limit: count,
       offset: from,
       where: {
-        post: req.post.id,
+        post_id: req.post.id,
       },
+      include: [
+        { model: User, as: "author", foreignKey: "author_id" },
+        { model: Post, as: "post", foreignKey: "post_id" },
+      ],
     });
     return res.send({
       // ADD FILTER

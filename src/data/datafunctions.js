@@ -1,7 +1,4 @@
-import { db } from "../database.js";
-
 import {
-  sendError,
   MissingParametersError,
   BadParametersError,
   GenericError,

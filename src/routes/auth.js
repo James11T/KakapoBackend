@@ -13,7 +13,6 @@ import { checkHash } from "../auth/passwords.js";
 import { signToken } from "../auth/tokens.js";
 import { createNewUser } from "../data/datafunctions.js";
 import { checkRequiredParameters } from "../utils/validations.js";
-import { db } from "../database.js";
 import User from "../models/user.model.js";
 
 const signIn = async (req, res) => {

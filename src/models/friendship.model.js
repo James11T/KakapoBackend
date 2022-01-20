@@ -1,6 +1,7 @@
 import { DataTypes } from "sequelize";
-import User from "./user.model.js";
+
 import { db } from "../database.js";
+import User from "./user.model.js";
 
 const Friendship = db.define(
   "friendship",
@@ -11,21 +12,13 @@ const Friendship = db.define(
       autoIncrement: true,
       primaryKey: true,
     },
-    user1: {
+    user1_id: {
       type: DataTypes.INTEGER,
       allowNull: false,
-      references: {
-        model: User,
-        key: "id",
-      },
     },
-    user2: {
+    user2_id: {
       type: DataTypes.INTEGER,
       allowNull: false,
-      references: {
-        model: User,
-        key: "id",
-      },
     },
     friends_since: {
       type: DataTypes.INTEGER,
@@ -36,5 +29,15 @@ const Friendship = db.define(
     tableName: "friendship",
   }
 );
+
+Friendship.belongsTo(User, {
+  as: "user1",
+  foreignKey: "user1_id",
+});
+
+Friendship.belongsTo(User, {
+  as: "user2",
+  foreignKey: "user2_id",
+});
 
 export default Friendship;

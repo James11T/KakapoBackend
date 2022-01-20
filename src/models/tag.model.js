@@ -1,6 +1,7 @@
 import { DataTypes } from "sequelize";
-import Post from "./post.model.js";
+
 import { db } from "../database.js";
+import Post from "./post.model.js";
 
 const Tag = db.define(
   "tag",
@@ -11,13 +12,9 @@ const Tag = db.define(
       autoIncrement: true,
       primaryKey: true,
     },
-    post: {
+    post_id: {
       type: DataTypes.INTEGER,
       allowNull: false,
-      references: {
-        model: Post,
-        key: "id",
-      },
     },
     tag: {
       type: DataTypes.STRING(64),
@@ -31,5 +28,10 @@ const Tag = db.define(
     tableName: "tag",
   }
 );
+
+Tag.belongsTo(Post, {
+  as: "post",
+  foreignKey: "post_id",
+});
 
 export default Tag;

@@ -11,7 +11,6 @@ import { isAuthenticated } from "../middleware/auth.middleware.js";
 import { getUserFriendRoutes } from "./user/friend.js";
 import { paramUserMiddleware } from "../middleware/data.middleware.js";
 import { clamp } from "../utils/funcs.js";
-import { db } from "../database.js";
 import User from "../models/user.model.js";
 import Post from "../models/post.model.js";
 
@@ -35,10 +34,10 @@ const kakapoIDTakenCheck = async (req, res) => {
   const { kakapo_id } = req.params;
 
   try {
-    const user = await User.findOne({
+    const userCount = await User.count({
       where: { kakapo_id: kakapo_id },
     });
-    return res.send({ taken: !!user });
+    return res.send({ taken: userCount > 0 });
   } catch (error) {
     return sendError(res, new GenericError("Failed to retrieve user"));
   }
@@ -80,7 +79,8 @@ const getUserPosts = async (req, res) => {
     const results = await Post.findAll({
       limit: count,
       offset: from,
-      where: { author: req.user.id },
+      where: { author_id: req.user.id },
+      include: [{ model: User, as: "author", foreignKey: "author_id" }],
     });
     return res.send({
       // ADD FILTER

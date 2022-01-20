@@ -6,7 +6,4 @@ import Comment from "./comment.model.js";
 import Friendship from "./friendship.model.js";
 import FriendRequest from "./friendrequest.model.js";
 
-User.hasMany(FriendRequest);
-FriendRequest.belongsTo(User);
-
 export { User, Post, Tag, Like, Comment, Friendship, FriendRequest };

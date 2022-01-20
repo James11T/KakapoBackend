@@ -1,7 +1,8 @@
 import { DataTypes } from "sequelize";
+
+import { db } from "../database.js";
 import User from "./user.model.js";
 import Post from "./post.model.js";
-import { db } from "../database.js";
 
 const Like = db.define(
   "like",
@@ -12,21 +13,13 @@ const Like = db.define(
       autoIncrement: true,
       primaryKey: true,
     },
-    post: {
+    post_id: {
       type: DataTypes.INTEGER,
       allowNull: false,
-      references: {
-        model: Post,
-        key: "id",
-      },
     },
-    liker: {
+    liker_id: {
       type: DataTypes.INTEGER,
       allowNull: false,
-      references: {
-        model: User,
-        key: "id",
-      },
     },
     liked_at: {
       type: DataTypes.INTEGER,
@@ -37,5 +30,15 @@ const Like = db.define(
     tableName: "like",
   }
 );
+
+Like.belongsTo(User, {
+  as: "liker",
+  foreignKey: "liker_id",
+});
+
+Like.belongsTo(Post, {
+  as: "post",
+  foreignKey: "post_id",
+});
 
 export default Like;

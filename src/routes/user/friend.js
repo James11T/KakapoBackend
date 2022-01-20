@@ -1,6 +1,5 @@
 import express from "express";
 import { Op } from "sequelize";
-import { db } from "../../database.js";
 import {
   sendError,
   AlreadyFriendsError,
@@ -13,15 +12,18 @@ import { isAuthenticated } from "../../middleware/auth.middleware.js";
 import { paramUserMiddleware } from "../../middleware/data.middleware.js";
 import FriendRequest from "../../models/friendrequest.model.js";
 import Friendship from "../../models/friendship.model.js";
+import User from "../../models/user.model.js";
 import { usersAreFriends, orderedFriendQuery } from "../../utils/database.js";
 import { getEpoch } from "../../utils/funcs.js";
 
 const getFriendCount = async (req, res) => {
   try {
     const count = await Friendship.count({
-      where: { [Op.or]: [{ user1: req.user }, { user2: req.user }] },
+      where: {
+        [Op.or]: [{ user1_id: req.user.id }, { user2_id: req.user.id }],
+      },
     });
-    return res.send({ count: count, user: req.user });
+    return res.send({ count: count });
   } catch (error) {
     return sendError(res, new GenericError("Failed to count friends."));
   }
@@ -48,7 +50,7 @@ const sendFriendRequest = async (req, res) => {
   // Check there isnt an existing friend request
   try {
     const friendRequest = await FriendRequest.findOne({
-      where: { from: req.authenticatedUser.id, to: req.user.id },
+      where: { from_id: req.authenticatedUser.id, to_id: req.user.id },
     });
     if (friendRequest) {
       return sendError(res, new PendingFriendRequestError());
@@ -61,8 +63,8 @@ const sendFriendRequest = async (req, res) => {
   }
 
   const newFriendRequestData = {
-    from: req.authenticatedUser.id,
-    to: req.user.id,
+    from_id: req.authenticatedUser.id,
+    to_id: req.user.id,
     sent_at: getEpoch(),
   };
 
@@ -70,13 +72,16 @@ const sendFriendRequest = async (req, res) => {
     await FriendRequest.create(newFriendRequestData);
     return res.send({ success: true });
   } catch (error) {
-    return sendError(res, new GenericError("Failed to create friend request."));
+    return sendError(res, new GenericError(error));
   }
 };
 
 const acceptFriendRequest = async (req, res) => {
   // Check friend request was sent
-  let friendRequestQuery = { from: req.user.id, to: req.authenticatedUser.id };
+  let friendRequestQuery = {
+    from_id: req.user.id,
+    to_id: req.authenticatedUser.id,
+  };
 
   try {
     const friendRequest = await FriendRequest.findOne({
@@ -133,13 +138,18 @@ const acceptFriendRequest = async (req, res) => {
 const getAllFriendRequests = async (req, res) => {
   try {
     const results = await FriendRequest.findAll({
-      where: { to: req.authenticatedUser.id },
+      where: { to_id: req.authenticatedUser.id },
+      include: [
+        { model: User, as: "from", foreignKey: "from_id" },
+        { model: User, as: "to", foreignKey: "to_id" },
+      ],
     });
     // ADD FILTER
     return res.send({
       friend_requests: results,
     });
   } catch (error) {
+    console.error(error);
     return sendError(
       res,
       new GenericError("Failed to retrieve frient requests.")

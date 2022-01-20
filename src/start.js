@@ -1,11 +1,12 @@
 import express from "express";
-import { db } from "./database.js";
-import "./models/index.js";
 
+import { db } from "./database.js";
 import { getRoutes } from "./routes/index.js";
 import { authenticateRequest } from "./middleware/auth.middleware.js";
 import fileUpload from "express-fileupload";
 import { logRequest } from "./middleware/logging.middleware.js";
+
+import "./models/index.js";
 
 /**
  * Used to start the backend server

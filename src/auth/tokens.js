@@ -1,8 +1,7 @@
 import jwt from "jsonwebtoken";
-import { getEpoch } from "../utils/funcs.js";
-import { db } from "../database.js";
 
 import { BadTokenError, NotAuthenticatedError } from "../errors/apierrors.js";
+import { getEpoch } from "../utils/funcs.js";
 import User from "../models/user.model.js";
 
 /**

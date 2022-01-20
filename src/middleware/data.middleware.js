@@ -16,6 +16,7 @@ const resolveParam = async (table, column, value) => {
   try {
     const result = await db.models[table].findOne({
       where: { [column]: value },
+      include: [{ all: true }],
     });
     return [null, result];
   } catch (error) {

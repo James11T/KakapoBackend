@@ -1,7 +1,8 @@
 import { DataTypes } from "sequelize";
+
+import { db } from "../database.js";
 import User from "./user.model.js";
 import Post from "./post.model.js";
-import { db } from "../database.js";
 
 const Comment = db.define(
   "comment",
@@ -12,21 +13,13 @@ const Comment = db.define(
       autoIncrement: true,
       primaryKey: true,
     },
-    post: {
+    post_id: {
       type: DataTypes.INTEGER,
       allowNull: false,
-      references: {
-        model: Post,
-        key: "id",
-      },
     },
-    author: {
+    author_id: {
       type: DataTypes.INTEGER,
       allowNull: false,
-      references: {
-        model: User,
-        key: "id",
-      },
     },
     content: {
       type: DataTypes.STRING(256),
@@ -54,5 +47,15 @@ const Comment = db.define(
     tableName: "comment",
   }
 );
+
+Comment.belongsTo(User, {
+  as: "author",
+  foreignKey: "author_id",
+});
+
+Comment.belongsTo(Post, {
+  as: "post",
+  foreignKey: "post_id",
+});
 
 export default Comment;

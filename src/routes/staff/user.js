@@ -14,7 +14,6 @@ import {
   sendError,
 } from "../../errors/apierrors.js";
 import { isKakapoIDInUse } from "../../utils/database.js";
-import { db } from "../../database.js";
 import Post from "../../models/post.model.js";
 import Friendship from "../../models/friendship.model.js";
 import User from "../../models/user.model.js";
@@ -27,13 +26,13 @@ const getFullUserData = async (req, res) => {
 
   try {
     const userId = req.user.id;
-    postCount = await Post.count({ where: { author: userId } });
+    postCount = await Post.count({ where: { author_id: userId } });
 
     friendCount = await Friendship.count({
-      where: { [Op.or]: [{ user1: userId }, { user2: userId }] },
+      where: { [Op.or]: [{ user1_id: userId }, { user2_id: userId }] },
     });
 
-    commentCount = await Comment.count({ where: { author: userId } });
+    commentCount = await Comment.count({ where: { author_id: userId } });
   } catch (error) {
     return sendError(
       res,

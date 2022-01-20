@@ -1,5 +1,4 @@
 import fs from "fs";
-import { db } from "../database.js";
 import { GenericError } from "../errors/apierrors.js";
 import Friendship from "../models/friendship.model.js";
 import Post from "../models/post.model.js";
@@ -14,9 +13,9 @@ import User from "../models/user.model.js";
  */
 const orderedFriendQuery = (user1, user2) => {
   if (user1.id < user2.id) {
-    return { user1: user1.id, user2: user2.id };
+    return { user1_id: user1.id, user2_id: user2.id };
   } else {
-    return { user1: user2.id, user2: user1.id };
+    return { user1_id: user2.id, user2_id: user1.id };
   }
 };
 

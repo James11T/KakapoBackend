@@ -1,6 +1,7 @@
 import { DataTypes } from "sequelize";
-import User from "./user.model.js";
+
 import { db } from "../database.js";
+import User from "./user.model.js";
 
 const Post = db.define(
   "post",
@@ -11,13 +12,9 @@ const Post = db.define(
       autoIncrement: true,
       primaryKey: true,
     },
-    author: {
+    author_id: {
       type: DataTypes.INTEGER,
       allowNull: false,
-      references: {
-        model: User,
-        key: "id",
-      },
     },
     media: {
       type: DataTypes.STRING(256),
@@ -45,5 +42,10 @@ const Post = db.define(
     tableName: "post",
   }
 );
+
+Post.belongsTo(User, {
+  as: "author",
+  foreignKey: "author_id",
+});
 
 export default Post;

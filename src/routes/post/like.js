@@ -8,12 +8,13 @@ import {
 import { getEpoch } from "../../utils/funcs.js";
 import { isAuthenticated } from "../../middleware/auth.middleware.js";
 import { paramPostMiddleware } from "../../middleware/data.middleware.js";
-import { db } from "../../database.js";
 import Like from "../../models/like.model.js";
 
 const getLikeCount = async (req, res) => {
   try {
-    const count = await Like.count({ where: { post: req.post.id } });
+    const count = await Like.count({
+      where: { post_id: req.post.id },
+    });
     return res.send({ count: count });
   } catch (error) {
     return sendError(res, new GenericError("Failed to count likes."));
@@ -24,8 +25,8 @@ const likePost = async (req, res) => {
   try {
     const likeResult = await Like.findOne({
       where: {
-        post: req.post.id,
-        liker: req.authenticatedUser.id,
+        post_id: req.post.id,
+        liker_id: req.authenticatedUser.id,
       },
     });
 
@@ -37,8 +38,8 @@ const likePost = async (req, res) => {
   }
 
   const newLikeData = {
-    post: req.post.id,
-    liker: req.authenticatedUser.id,
+    post_id: req.post.id,
+    liker_id: req.authenticatedUser.id,
     liked_at: getEpoch(),
   };
 
@@ -53,7 +54,7 @@ const likePost = async (req, res) => {
 const unlikePost = async (req, res) => {
   try {
     const getLike = await Like.findOne({
-      where: { post: req.post.id, liker: req.authenticatedUser.id },
+      where: { post_id: req.post.id, liker_id: req.authenticatedUser.id },
     });
     if (!getLike) {
       return sendError(res, new NotLikedError());
@@ -64,7 +65,7 @@ const unlikePost = async (req, res) => {
 
   try {
     await Like.destroy({
-      where: { post: req.post.id, liker: req.authenticatedUser.id },
+      where: { post_id: req.post.id, liker_id: req.authenticatedUser.id },
     });
     return res.send({ success: true });
   } catch (error) {
