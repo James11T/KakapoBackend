@@ -1,4 +1,4 @@
-import { randomUUID } from "crypto";
+import { randomUUID, createHash } from "crypto";
 
 const PUBLIC_ID_CHARACTERS = "abcdefghijklmnopqrstuvwxyz".split("");
 
@@ -58,4 +58,8 @@ const generatePublicId = (length = 16) => {
   return ns;
 };
 
-export { getEpoch, clamp, getUUID, generatePublicId };
+const sha256String = (value, algo = "sha256", digest = "hex") => {
+  return createHash(algo).update(value).digest(digest);
+};
+
+export { getEpoch, clamp, getUUID, generatePublicId, sha256String };

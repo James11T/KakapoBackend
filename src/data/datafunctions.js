@@ -4,7 +4,7 @@ import {
   GenericError,
   KakapoIDReservedError,
 } from "../errors/apierrors.js";
-import { getEpoch, getUUID } from "../utils/funcs.js";
+import { getEpoch, sha256String } from "../utils/funcs.js";
 import {
   checkRequiredParameters,
   checkEmail,
@@ -81,7 +81,7 @@ const createNewUser = async (data) => {
     email: email,
     password: toPasswordHashString(salt, hash),
     joined_at: getEpoch(),
-    public_id: getUUID(),
+    public_id: sha256String(kakapo_id),
   };
 
   try {
