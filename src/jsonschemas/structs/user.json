@@ -1,0 +1,72 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "kakapo/user",
+  "title": "user",
+  "description": "A full kakapo user schema",
+  "type": "object",
+  "properties": {
+    "id": {
+      "description": "The primary unique identifier for a user",
+      "type": "integer"
+    },
+    "kakapo_id": {
+      "description": "A human unique identifier for a user",
+      "type": "string"
+    },
+    "display_name": {
+      "description": "An indentifier for a user.",
+      "type": "string"
+    },
+    "email": {
+      "description": "A users email.",
+      "type": "string",
+      "format": "email"
+    },
+    "password": {
+      "description": "The users salted hashed password.",
+      "type": "string"
+    },
+    "about": {
+      "description": "A users description of themself.",
+      "type": "string"
+    },
+    "rank": {
+      "description": "A users authorisation level.",
+      "type": "integer",
+      "minimum": 0
+    },
+    "badge": {
+      "description": "The badge that is displayed on the users profile.",
+      "type": "integer",
+      "minimum": 0
+    },
+    "joined_at": {
+      "description": "The epoch when the users account was created.",
+      "type": "integer",
+      "minimum": 0
+    },
+    "last_online": {
+      "description": "The epoch when the users was last online.",
+      "type": "integer",
+      "minimum": 0
+    },
+    "pfp": {
+      "description": "The profile picture of the user.",
+      "type": "string"
+    },
+    "disabled": {
+      "description": "Indicated wether the account is disabled for any reason.",
+      "type": "boolean"
+    },
+    "deleted": {
+      "description": "Indicated wether the account is to be concidered deleted.",
+      "type": "boolean"
+    },
+    "public_id": {
+      "description": "A unique identifier code for the user.",
+      "type": "string",
+      "length": 5
+    }
+  },
+  "required": []
+}
