@@ -119,18 +119,13 @@ const repostPost = async (req, res) => {
 };
 
 const getUserPosts = async (req, res) => {
-  let { from = 0, count = 20 } = req.query;
+  let { after, before, count = 20 } = req.query;
 
-  try {
-    from = Number(from);
-  } catch (castingError) {
-    return sendError(res, new BadParametersError({ badParameters: ["from"] }));
-  }
-
-  try {
-    count = Number(count);
-  } catch (castingError) {
-    return sendError(res, new BadParametersError({ badParameters: ["count"] }));
+  if (!after && !before) {
+    return sendError(
+      res,
+      new MissingParametersError({ missingParameters: ["after", "before"] })
+    );
   }
 
   count = clamp(count, 1, 40);
